@@ -353,7 +353,8 @@
     if (success) {
       var y = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
       window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
-      success.focus && success.setAttribute('tabindex', '-1');
+      success.setAttribute('tabindex', '-1');
+      success.focus({ preventScroll: true });
     }
   }
 
