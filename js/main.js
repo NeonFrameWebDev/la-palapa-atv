@@ -252,6 +252,22 @@
   function setError(field) { if (field) field.classList.add('has-error'); }
   function clearError(field) { if (field) field.classList.remove('has-error'); }
 
+  /* The reservation Submit stays DISABLED (and shows a hint explaining why) until the
+     rental waiver is signed. lockSubmit/unlockSubmit toggle that gated state. The
+     ".is-locked" class distinguishes "waiting on waiver" from the in-flight "Sending..." state. */
+  function lockSubmit() {
+    var btn = document.getElementById('submitBtn');
+    var hint = document.getElementById('submitHint');
+    if (btn) { btn.disabled = true; btn.classList.add('is-locked'); }
+    if (hint) hint.hidden = false;
+  }
+  function unlockSubmit() {
+    var btn = document.getElementById('submitBtn');
+    var hint = document.getElementById('submitHint');
+    if (btn) { btn.disabled = false; btn.classList.remove('is-locked'); }
+    if (hint) hint.hidden = true;
+  }
+
   // clear field errors as the user fixes them
   $$('#reserveForm input, #reserveForm select, #reserveForm textarea').forEach(function (el) {
     el.addEventListener('input', function () { clearError(el.closest('.field')); clearContactError(); });
@@ -308,6 +324,13 @@
         if (!firstInvalid) firstInvalid = phone;
       }
 
+      // REQUIRED: rental waiver must be signed before the reservation can be sent
+      if (!waiverData) {
+        var waiverField = document.getElementById('waiverStep');
+        setError(waiverField ? waiverField.closest('.field') : null);
+        if (!firstInvalid) firstInvalid = document.getElementById('openWaiver');
+      }
+
       if (firstInvalid) {
         var y = firstInvalid.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
         window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
@@ -325,11 +348,34 @@
       if (errorNotice) errorNotice.classList.remove('is-shown');
 
       /*
-        SUBMIT IS STUBBED. Send destination (owner email / WhatsApp) is TBD.
-        No network request is made. We simulate the request then show the success state.
-        When the endpoint is known, replace this timeout with a fetch(...) and route
-        the .catch() to showError().
+        SUBMIT IS STUBBED. Send/STORE destination for the reservation + signed waiver is TBD (per owner).
+        No network request is made and NO test submission is fired anywhere. We simulate the request
+        then show the success state.
+
+        The payload below now ALSO carries the signed digital waiver. When the destination is known,
+        replace this timeout with a fetch(...) POSTing `payload`, and route the .catch() to showError().
+
+        LEGAL-GRADE RECOMMENDATION when wiring this up: this is a binding rental contract, so the
+        signed waiver should be delivered AND stored durably (e.g. server-side), and ideally a
+        timestamped PDF/copy of exactly what the customer saw and signed should be generated and
+        retained. The signature is captured as a PNG data URL (if drawn) or the typed legal name.
       */
+      var payload = {
+        reservation: {
+          date: document.getElementById('rDate').value || '',
+          time: document.getElementById('rTime').value || '',
+          vehicle: (document.querySelector('.vehicle-pills input:checked') || {}).value || '',
+          riders: riders ? clampRiders(riders.value) : null,
+          name: (document.getElementById('rName').value || '').trim(),
+          phone: (phone && phone.value.trim()) || '',
+          email: (email && email.value.trim()) || '',
+          notes: (document.getElementById('rNotes').value || '').trim()
+        },
+        waiver: waiverData // { signerName, agreement:true, signatureType, signature, customer:{...}, signedAtISO, signedPlace }
+      };
+      // payload is assembled for the future real endpoint; not posted anywhere in this stub.
+      void payload;
+
       setTimeout(function () { showSuccess(); }, 900);
     });
   }
@@ -382,10 +428,296 @@
       btn.disabled = false;
       label.textContent = currentLang === 'es' ? 'Enviar mi solicitud' : 'Send my request';
       $$('#reserveForm .field').forEach(function (f) { f.classList.remove('has-error'); });
+      resetWaiver();
       var y = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
       window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
   }
+
+  /* =====================================================
+     Rental Agreement / Waiver modal
+     Focus-trapped dialog, ESC closes, scroll-locked.
+     Signature: draw-to-sign canvas (mouse + touch) OR a typed legal name
+     (keyboard/accessible alternative). Either satisfies the signature.
+     On sign: marks the reservation waiver status + unlocks the submit and
+     stores the signed payload in `waiverData`.
+     ===================================================== */
+  var waiverData = null; // null until signed; set to the signed-waiver object on sign
+
+  var waiverModal = document.getElementById('waiverModal');
+  var openWaiverBtn = document.getElementById('openWaiver');
+  var waiverCloseBtn = document.getElementById('waiverClose');
+  var waiverCancelBtn = document.getElementById('waiverCancel');
+  var waiverOverlay = document.getElementById('waiverOverlay');
+  var waiverForm = document.getElementById('waiverForm');
+  var waiverSignBtn = document.getElementById('waiverSign');
+  var waiverAgree = document.getElementById('wAgree');
+  var waiverTypedSig = document.getElementById('wTypedSig');
+  var waiverCanvas = document.getElementById('waiverCanvas');
+  var waiverSigClear = document.getElementById('waiverSigClear');
+  var waiverCanvasWrap = waiverCanvas ? waiverCanvas.closest('.waiver__sig-canvas-wrap') : null;
+  var waiverLastFocused = null;
+
+  // signing date strings (long form, no leading-zero noise) for EN + ES
+  function buildSignDate() {
+    var d = new Date();
+    var iso = d.toISOString();
+    var enFmt, esFmt;
+    try {
+      enFmt = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) { enFmt = d.toDateString(); }
+    try {
+      esFmt = d.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) { esFmt = enFmt; }
+    return { iso: iso, en: enFmt, es: esFmt };
+  }
+  var signDate = buildSignDate();
+
+  function paintSignDate() {
+    var human = currentLang === 'es' ? signDate.es : signDate.en;
+    var contractDate = document.getElementById('waiverContractDate');
+    var signDateEl = document.getElementById('waiverSignDate');
+    if (contractDate) contractDate.textContent = human;
+    if (signDateEl) signDateEl.textContent = human;
+  }
+
+  /* ---- signature canvas (lightweight vanilla) ---- */
+  var sigCtx = null, sigDrawing = false, sigHasInk = false, sigLastX = 0, sigLastY = 0;
+  function sigSetup() {
+    if (!waiverCanvas) return;
+    // size the backing store to the displayed CSS size * DPR for crisp lines
+    var rect = waiverCanvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    waiverCanvas.width = w * dpr;
+    waiverCanvas.height = h * dpr;
+    sigCtx = waiverCanvas.getContext('2d');
+    sigCtx.scale(dpr, dpr);
+    sigCtx.lineWidth = 2.2;
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigCtx.strokeStyle = '#1A1A1A';
+  }
+  function sigPos(e) {
+    var rect = waiverCanvas.getBoundingClientRect();
+    var p = e.touches && e.touches[0] ? e.touches[0] : e;
+    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+  }
+  function sigStart(e) {
+    if (!sigCtx) sigSetup();
+    sigDrawing = true;
+    var p = sigPos(e);
+    sigLastX = p.x; sigLastY = p.y;
+    if (e.cancelable) e.preventDefault();
+  }
+  function sigMove(e) {
+    if (!sigDrawing || !sigCtx) return;
+    var p = sigPos(e);
+    sigCtx.beginPath();
+    sigCtx.moveTo(sigLastX, sigLastY);
+    sigCtx.lineTo(p.x, p.y);
+    sigCtx.stroke();
+    sigLastX = p.x; sigLastY = p.y;
+    if (!sigHasInk) { sigHasInk = true; if (waiverCanvasWrap) waiverCanvasWrap.classList.add('has-ink'); }
+    refreshSignState();
+    if (e.cancelable) e.preventDefault();
+  }
+  function sigEnd() { sigDrawing = false; }
+  function sigClear() {
+    if (sigCtx && waiverCanvas) sigCtx.clearRect(0, 0, waiverCanvas.width, waiverCanvas.height);
+    sigHasInk = false;
+    if (waiverCanvasWrap) waiverCanvasWrap.classList.remove('has-ink');
+    refreshSignState();
+  }
+  function hasDrawnSig() { return sigHasInk; }
+  function hasTypedSig() { return waiverTypedSig && waiverTypedSig.value.trim().length > 1; }
+
+  if (waiverCanvas) {
+    waiverCanvas.addEventListener('mousedown', sigStart);
+    window.addEventListener('mousemove', sigMove);
+    window.addEventListener('mouseup', sigEnd);
+    waiverCanvas.addEventListener('touchstart', sigStart, { passive: false });
+    waiverCanvas.addEventListener('touchmove', sigMove, { passive: false });
+    waiverCanvas.addEventListener('touchend', sigEnd);
+  }
+  if (waiverSigClear) waiverSigClear.addEventListener('click', sigClear);
+
+  /* ---- enable/disable the Agree & Sign button ---- */
+  function waiverReqFieldsOk() {
+    var name = document.getElementById('wName');
+    var ph = document.getElementById('wPhone');
+    return !!(name && name.value.trim()) && !!(ph && ph.value.trim());
+  }
+  function refreshSignState() {
+    if (!waiverSignBtn) return;
+    var ok = waiverAgree && waiverAgree.checked && (hasDrawnSig() || hasTypedSig()) && waiverReqFieldsOk();
+    waiverSignBtn.disabled = !ok;
+  }
+  if (waiverAgree) waiverAgree.addEventListener('change', refreshSignState);
+  if (waiverTypedSig) waiverTypedSig.addEventListener('input', refreshSignState);
+  $$('#waiverForm input').forEach(function (el) {
+    el.addEventListener('input', function () { refreshSignState(); clearError(el.closest('.field')); });
+  });
+
+  /* ---- prefill name/phone from the reservation form ---- */
+  function prefillWaiver() {
+    var rName = document.getElementById('rName');
+    var rPhone = document.getElementById('rPhone');
+    var wName = document.getElementById('wName');
+    var wPhone = document.getElementById('wPhone');
+    if (wName && rName && rName.value.trim() && !wName.value.trim()) wName.value = rName.value.trim();
+    if (wPhone && rPhone && rPhone.value.trim() && !wPhone.value.trim()) wPhone.value = rPhone.value.trim();
+  }
+
+  /* ---- focus trap ---- */
+  function waiverFocusables() {
+    return $$('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), canvas[tabindex], [tabindex]:not([tabindex="-1"])', waiverModal)
+      .filter(function (el) { return el.offsetParent !== null || el === document.activeElement; });
+  }
+  function onWaiverKeydown(e) {
+    if (!waiverModal || waiverModal.hasAttribute('hidden')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeWaiver(); return; }
+    if (e.key !== 'Tab') return;
+    var f = waiverFocusables();
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  function openWaiver() {
+    if (!waiverModal) return;
+    waiverLastFocused = document.activeElement;
+    paintSignDate();
+    prefillWaiver();
+    waiverModal.removeAttribute('hidden');
+    document.body.classList.add('is-locked');
+    document.addEventListener('keydown', onWaiverKeydown);
+    // canvas needs a layout pass before sizing
+    requestAnimationFrame(function () { sigSetup(); refreshSignState(); });
+    var close = document.getElementById('waiverClose');
+    if (close) close.focus();
+  }
+  function closeWaiver() {
+    if (!waiverModal) return;
+    waiverModal.setAttribute('hidden', '');
+    document.body.classList.remove('is-locked');
+    document.removeEventListener('keydown', onWaiverKeydown);
+    if (waiverLastFocused && waiverLastFocused.focus) waiverLastFocused.focus();
+  }
+
+  if (openWaiverBtn) openWaiverBtn.addEventListener('click', openWaiver);
+  if (waiverCloseBtn) waiverCloseBtn.addEventListener('click', closeWaiver);
+  if (waiverCancelBtn) waiverCancelBtn.addEventListener('click', closeWaiver);
+  if (waiverOverlay) waiverOverlay.addEventListener('click', closeWaiver);
+
+  /* ---- sign (submit of the waiver form) ---- */
+  if (waiverForm) {
+    waiverForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var firstBad = null;
+
+      var wName = document.getElementById('wName');
+      var wPhone = document.getElementById('wPhone');
+      if (!wName.value.trim()) { setError(wName.closest('.field')); if (!firstBad) firstBad = wName; } else clearError(wName.closest('.field'));
+      if (!wPhone.value.trim()) { setError(wPhone.closest('.field')); if (!firstBad) firstBad = wPhone; } else clearError(wPhone.closest('.field'));
+
+      var agreeErr = document.getElementById('wAgreeErr');
+      if (!waiverAgree.checked) { if (agreeErr) agreeErr.classList.add('is-shown'); if (!firstBad) firstBad = waiverAgree; }
+      else if (agreeErr) agreeErr.classList.remove('is-shown');
+
+      var sigErr = document.getElementById('wSigErr');
+      var sigOk = hasDrawnSig() || hasTypedSig();
+      if (!sigOk) { if (sigErr) sigErr.classList.add('is-shown'); if (!firstBad) firstBad = (waiverTypedSig || waiverCanvas); }
+      else if (sigErr) sigErr.classList.remove('is-shown');
+
+      if (firstBad) { try { firstBad.focus(); } catch (err) {} return; }
+
+      // capture the signature: drawn PNG data URL, or the typed legal name
+      var drawn = hasDrawnSig();
+      var signatureValue = drawn ? waiverCanvas.toDataURL('image/png') : waiverTypedSig.value.trim();
+      var signerName = wName.value.trim();
+
+      waiverData = {
+        signerName: signerName,
+        agreement: true,
+        signatureType: drawn ? 'drawn' : 'typed',
+        signature: signatureValue,
+        typedName: drawn ? '' : waiverTypedSig.value.trim(),
+        customer: {
+          fullName: signerName,
+          telephone: wPhone.value.trim(),
+          address: (document.getElementById('wAddress').value || '').trim(),
+          hotel: (document.getElementById('wHotel').value || '').trim(),
+          roomNo: (document.getElementById('wRoom').value || '').trim(),
+          checkin: document.getElementById('wCheckin').value || '',
+          checkout: document.getElementById('wCheckout').value || ''
+        },
+        signedPlace: 'Puerto Penasco, Sonora',
+        signedAtISO: new Date().toISOString()
+      };
+
+      markWaiverSigned(signerName);
+      closeWaiver();
+    });
+  }
+
+  function markWaiverSigned(name) {
+    var pending = document.getElementById('waiverPending');
+    var signed = document.getElementById('waiverSigned');
+    var signedText = document.getElementById('waiverSignedText');
+    var human = currentLang === 'es' ? signDate.es : signDate.en;
+    if (signedText) {
+      signedText.textContent = (currentLang === 'es' ? 'Firmado por ' : 'Signed by ') + name + (currentLang === 'es' ? ' el ' : ' on ') + human;
+    }
+    if (pending) pending.hidden = true;
+    if (signed) signed.hidden = false;
+    // change the open button label to "Review / re-sign"
+    if (openWaiverBtn) {
+      openWaiverBtn.setAttribute('data-en', 'Review or re-sign waiver');
+      openWaiverBtn.setAttribute('data-es', 'Revisar o volver a firmar');
+      openWaiverBtn.textContent = currentLang === 'es' ? 'Revisar o volver a firmar' : 'Review or re-sign waiver';
+    }
+    // clear the form-level waiver error if it was showing
+    var waiverField = document.getElementById('waiverStep');
+    clearError(waiverField ? waiverField.closest('.field') : null);
+    // waiver signed -> unlock the reservation Submit
+    unlockSubmit();
+  }
+
+  function resetWaiver() {
+    waiverData = null;
+    if (waiverForm) waiverForm.reset();
+    sigClear();
+    var pending = document.getElementById('waiverPending');
+    var signed = document.getElementById('waiverSigned');
+    if (pending) pending.hidden = false;
+    if (signed) signed.hidden = true;
+    if (waiverSignBtn) waiverSignBtn.disabled = true;
+    if (openWaiverBtn) {
+      openWaiverBtn.setAttribute('data-en', 'Read & sign the rental waiver');
+      openWaiverBtn.setAttribute('data-es', 'Leer y firmar el contrato de renta');
+      openWaiverBtn.textContent = currentLang === 'es' ? 'Leer y firmar el contrato de renta' : 'Read & sign the rental waiver';
+    }
+    var agreeErr = document.getElementById('wAgreeErr');
+    var sigErr = document.getElementById('wSigErr');
+    if (agreeErr) agreeErr.classList.remove('is-shown');
+    if (sigErr) sigErr.classList.remove('is-shown');
+    $$('#waiverForm .field').forEach(function (f) { f.classList.remove('has-error'); });
+    // no waiver -> re-lock the reservation Submit and re-show the hint
+    lockSubmit();
+  }
+
+  // keep the signing date + signed status label correct if the language toggles
+  (function () {
+    $$('.lang-toggle button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        paintSignDate();
+        if (waiverData) markWaiverSigned(waiverData.signerName);
+      });
+    });
+  })();
 
   /* =====================================================
      Gallery lightbox (focus-trapped, ESC, arrows, swipe)
@@ -455,6 +787,11 @@
       if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
     }, { passive: true });
   }
+
+  /* =====================================================
+     Initial state: reservation Submit locked until waiver signed
+     ===================================================== */
+  if (!waiverData) lockSubmit();
 
   /* =====================================================
      Footer year

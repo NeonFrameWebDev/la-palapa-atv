@@ -378,6 +378,25 @@
                         data-placeholder-es="¿Algo que debamos saber? Tamaño del grupo, experiencia, peticiones especiales."
                         placeholder="Anything we should know? Group size, experience, special requests."></textarea>
             </div>
+
+            <!-- REQUIRED: digital rental agreement / waiver step (replaces the paper waiver) -->
+            <div class="field field--full">
+              <label id="waiverLabel"><span data-en="Rental Agreement & Waiver" data-es="Contrato de Renta y Exoneración">Rental Agreement &amp; Waiver</span> <span class="req" aria-hidden="true">*</span></label>
+              <div class="waiver-step" id="waiverStep" aria-describedby="rWaiverErr">
+                <button type="button" class="btn btn--dark waiver-step__btn" id="openWaiver"
+                        aria-haspopup="dialog" aria-controls="waiverModal"
+                        data-en="Read &amp; sign the rental waiver" data-es="Leer y firmar el contrato de renta">Read &amp; sign the rental waiver</button>
+                <div class="waiver-step__status" id="waiverStatus" role="status" aria-live="polite">
+                  <span class="waiver-step__status-pending" id="waiverPending"
+                        data-en="Not signed yet" data-es="Sin firmar aún">Not signed yet</span>
+                  <span class="waiver-step__status-signed" id="waiverSigned" hidden>
+                    <svg class="waiver-check" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span id="waiverSignedText"></span>
+                  </span>
+                </div>
+              </div>
+              <span class="field__error" id="rWaiverErr" data-en="Please read and sign the rental waiver to finish your request." data-es="Por favor lee y firma el contrato de renta para terminar tu solicitud.">Please read and sign the rental waiver to finish your request.</span>
+            </div>
           </div>
 
           <div class="form-error-notice" id="formError" role="alert">
@@ -386,9 +405,12 @@
           </div>
 
           <div class="form-submit">
-            <button type="submit" class="btn btn--red" id="submitBtn">
+            <button type="submit" class="btn btn--red" id="submitBtn" disabled aria-describedby="submitHint">
               <span class="btn-label" data-en="Send my request" data-es="Enviar mi solicitud">Send my request</span>
             </button>
+            <!-- Submit stays disabled until the rental waiver is signed. The hint explains why; it hides once signed. -->
+            <p class="form-submit__hint" id="submitHint" role="status" aria-live="polite"
+               data-en="Please sign the rental waiver above to complete your reservation." data-es="Por favor firma el contrato de renta de arriba para completar tu reserva.">Please sign the rental waiver above to complete your reservation.</p>
           </div>
           <p class="form-reassure" data-en="This is a request, not an instant booking. We check the day and confirm with you. Open every day from 8 AM." data-es="Esto es una solicitud, no una reserva automática. Revisamos el día y te confirmamos. Abierto todos los días desde las 8 AM.">This is a request, not an instant booking. We check the day and confirm with you. Open every day from 8 AM.</p>
         </form>
@@ -639,6 +661,159 @@
   <a class="icon-btn" href="tel:+526381124485" aria-label="Call La Palapa">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
   </a>
+</div>
+
+<!-- ===================== Rental Agreement / Waiver modal =====================
+     Focus-trapped dialog. Opened from the reservation form's "Read & sign the rental waiver".
+     The CONTRACT BODY is the owner's ACTUAL legal document, reproduced VERBATIM in English.
+     DO NOT paraphrase, summarize, "improve," or machine-translate the legal text.
+     i18n note: only the UI chrome (labels/buttons/headings around the contract) gets EN/ES via
+     data-en/data-es. The contract body stays in English on purpose.
+     TODO (owner): supply an OFFICIAL Spanish-language version of this contract to display for
+     Spanish-speaking customers. Until then the English legal text is the binding document shown. -->
+<div class="waiver" id="waiverModal" role="dialog" aria-modal="true" aria-labelledby="waiverTitle" aria-describedby="waiverSub" hidden>
+  <div class="waiver__overlay" id="waiverOverlay" aria-hidden="true"></div>
+  <div class="waiver__dialog" role="document">
+    <header class="waiver__head">
+      <div>
+        <h2 class="waiver__title" id="waiverTitle" data-en="Rental Agreement & Liability Waiver" data-es="Contrato de Renta y Exoneración de Responsabilidad">Rental Agreement &amp; Liability Waiver</h2>
+        <p class="waiver__sub" id="waiverSub" data-en="Please read in full and sign below." data-es="Por favor lee todo el contrato y firma abajo.">Please read in full and sign below.</p>
+      </div>
+      <button type="button" class="waiver__close" id="waiverClose" aria-label="Close" data-aria-en="Close" data-aria-es="Cerrar">&times;</button>
+    </header>
+
+    <div class="waiver__scroll">
+      <!-- ============================================================
+           BEGIN VERBATIM CONTRACT TEXT (English, owner's actual document).
+           Reproduced character-for-character. Set in Inter for legibility.
+           DO NOT EDIT THE WORDING. The {{TODAY}} token is replaced at open time
+           by the auto-filled signing date in the signing line below.
+           ============================================================ -->
+      <div class="waiver__contract" id="waiverContract">
+        <p class="waiver__c-brand">LA PALAPA RENTALS</p>
+        <p>CONTRATO DE RENTA DE RZR, CAN-AM. - That celebrate, on the one hand, the business LA PALAPA RZR &amp; ATV RENTALS, and on the other hand, THE CUSTOMER, who agrees on the rent consisting of:</p>
+
+        <p class="waiver__c-h">UNDER THE FOLLOWING CONDITIONS OR REGULATIONS FOR ITS USE:</p>
+        <ul>
+          <li>Shall be driven by people of legal age, and he/she shall have a driver's license</li>
+          <li>Obey all traffic signals and use the helmet given as a protective measure</li>
+          <li>Do not carry more than 4 people per RZR or Can-Am</li>
+          <li>Do not put the unit(s) into water, mud, or the sea water</li>
+          <li>Do not drive in the mountain called La Choya</li>
+          <li>Do not consume alcohol, drugs or substances that may prevent you from having full physical and mental capacity</li>
+          <li>The unit shall be delivered at the agreed time, any delay generates extra cost</li>
+          <li>There is no refund for delivering the unit before the agreed time</li>
+        </ul>
+
+        <p class="waiver__c-h">EXTRA PAYMENT FOR DAMAGES:</p>
+        <ul>
+          <li>For putting the unit in water or mud from $500.00 DLLS</li>
+          <li>Broken bars due to mishandling, crash or rollover $500.00 DLLS each</li>
+          <li>Damages in general caused by mishandling, crash or rollover start at: RZR or CAN-AM starting at $4,000.00 DLLS per service up to $38,000.00 DLLS for complete loss plus damages</li>
+        </ul>
+
+        <p class="waiver__c-h">LIABILITY. - THE CUSTOMER drives at his/her own risk, LA PALAPA RENTALS, has not contracted any insurance policy for civil liability or damages, therefore, THE CUSTOMER:</p>
+        <ul>
+          <li>is fully responsible and is bound to respond including and excludes for any damages or accident (including death) caused by mishandling, crash or rollover, by him/her or by the people he/she allows to drive the unit during the time of rental of the unit or while it is in possession, whether to third parties involved traveling in the unit or not, or to him/herself.</li>
+          <li>Is bound and agrees to respond for any mechanical and physical damages caused to the rental unit, or to any other involved.</li>
+          <li>Is bound and agrees to respond for damages caused to public or private property, as well as violations of traffic regulations</li>
+          <li>The insurance policy that the customer may have for his/her private vehicle does not apply to the rented unit nor does it cover damages caused.</li>
+        </ul>
+
+        <p class="waiver__c-h">WARRANTY. - THE CUSTOMER as a guarantee that he/she will be liable for all damages that could be caused by mishandling, collision or overturning; in this contract, gives as deposit and guarantee the vehicle with the following characteristics ____________; same that will be returned to cover the total cost of the damage(s) caused.</p>
+
+        <!-- The WARRANTY "characteristics ___" blank is filled in by staff at pickup, not the online customer. -->
+        <p class="waiver__c-staff" aria-hidden="true"><span data-en="Vehicle characteristics (filled in by staff at pickup):" data-es="Características del vehículo (las llena el personal al recoger):">Vehicle characteristics (filled in by staff at pickup):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+
+        <p class="waiver__c-sign-line">The customer declares to have read and fully acknowledges the content of this contract, in Puerto Penasco, Sonora on the <span id="waiverContractDate" class="waiver__c-date">[date]</span> ; therefore, it is recorded by signing at the bottom of this document.</p>
+      </div>
+      <!-- END VERBATIM CONTRACT TEXT -->
+
+      <!-- Small bilingual note. ONLY this note is translated; the contract clauses above stay English.
+           An OFFICIAL Spanish legal version is pending from the owner (do NOT auto-translate the clauses). -->
+      <p class="waiver__c-note" data-en="Official Spanish version available at pickup." data-es="Versión oficial en español disponible al recoger.">Official Spanish version available at pickup.</p>
+    </div>
+
+    <!-- Customer general data (mirrors the paper's CUSTOMER GENERAL DATA) + signing -->
+    <form class="waiver__form" id="waiverForm" novalidate>
+      <h3 class="waiver__sec" data-en="Customer Data" data-es="Datos del Cliente">Customer Data</h3>
+      <div class="waiver-grid">
+        <div class="field field--full">
+          <label for="wName"><span data-en="Full name" data-es="Nombre completo">Full name</span> <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="wName" name="wName" autocomplete="name" required aria-required="true" aria-describedby="wNameErr">
+          <span class="field__error" id="wNameErr" data-en="Enter your full legal name." data-es="Escribe tu nombre legal completo.">Enter your full legal name.</span>
+        </div>
+        <div class="field">
+          <label for="wPhone"><span data-en="Telephone" data-es="Teléfono">Telephone</span> <span class="req" aria-hidden="true">*</span></label>
+          <input type="tel" id="wPhone" name="wPhone" autocomplete="tel" inputmode="tel" required aria-required="true" aria-describedby="wPhoneErr">
+          <span class="field__error" id="wPhoneErr" data-en="Enter a telephone number." data-es="Escribe un número de teléfono.">Enter a telephone number.</span>
+        </div>
+        <div class="field">
+          <label for="wAddress"><span data-en="Address" data-es="Dirección">Address</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wAddress" name="wAddress" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label for="wHotel"><span data-en="Hotel" data-es="Hotel">Hotel</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wHotel" name="wHotel">
+        </div>
+        <div class="field">
+          <label for="wRoom"><span data-en="Room No." data-es="No. de Habitación">Room No.</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wRoom" name="wRoom" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="wCheckin"><span data-en="Check-in" data-es="Entrada">Check-in</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="date" id="wCheckin" name="wCheckin">
+        </div>
+        <div class="field">
+          <label for="wCheckout"><span data-en="Check-out" data-es="Salida">Check-out</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="date" id="wCheckout" name="wCheckout">
+        </div>
+      </div>
+
+      <!-- Auto-filled signing line -->
+      <p class="waiver__signed-place" id="waiverSignedPlace">
+        <span data-en="Signed in Puerto Penasco, Sonora on" data-es="Firmado en Puerto Peñasco, Sonora el">Signed in Puerto Penasco, Sonora on</span>
+        <span class="waiver__signed-date" id="waiverSignDate"></span>
+      </p>
+
+      <!-- Required agreement -->
+      <label class="waiver__agree" for="wAgree">
+        <input type="checkbox" id="wAgree" name="wAgree" required aria-required="true" aria-describedby="wAgreeErr">
+        <span data-en="I have read and fully acknowledge the content of this contract and agree to its terms." data-es="He leído y reconozco plenamente el contenido de este contrato y acepto sus términos.">I have read and fully acknowledge the content of this contract and agree to its terms.</span>
+      </label>
+      <span class="field__error waiver__agree-err" id="wAgreeErr" data-en="You must agree to the terms to sign." data-es="Debes aceptar los términos para firmar.">You must agree to the terms to sign.</span>
+
+      <!-- Signature: draw OR type a legal name (either satisfies the signature) -->
+      <h3 class="waiver__sec" data-en="Signature" data-es="Firma">Signature</h3>
+      <p class="waiver__sig-help" data-en="Sign by drawing below, or type your full legal name. Either one counts as your signature." data-es="Firma dibujando abajo, o escribe tu nombre legal completo. Cualquiera de las dos cuenta como tu firma.">Sign by drawing below, or type your full legal name. Either one counts as your signature.</p>
+
+      <div class="waiver__sig">
+        <div class="waiver__sig-canvas-wrap">
+          <canvas id="waiverCanvas" class="waiver__sig-canvas" width="600" height="180"
+                  role="img" aria-label="Draw your signature here" tabindex="0"></canvas>
+          <span class="waiver__sig-baseline" aria-hidden="true"></span>
+          <span class="waiver__sig-placeholder" id="waiverSigPlaceholder" aria-hidden="true"
+                data-en="Draw your signature here" data-es="Dibuja tu firma aquí">Draw your signature here</span>
+        </div>
+        <button type="button" class="waiver__sig-clear" id="waiverSigClear"
+                data-en="Clear" data-es="Borrar">Clear</button>
+      </div>
+
+      <div class="field field--full waiver__typed">
+        <label for="wTypedSig"><span data-en="Or type your full legal name to sign" data-es="O escribe tu nombre legal completo para firmar">Or type your full legal name to sign</span></label>
+        <input type="text" id="wTypedSig" name="wTypedSig" autocomplete="off" aria-describedby="wSigErr"
+               data-placeholder-en="Type your full legal name" data-placeholder-es="Escribe tu nombre legal completo" placeholder="Type your full legal name">
+      </div>
+      <span class="field__error waiver__sig-err" id="wSigErr" data-en="Add a signature: draw above or type your full legal name." data-es="Agrega una firma: dibuja arriba o escribe tu nombre legal completo.">Add a signature: draw above or type your full legal name.</span>
+
+      <div class="waiver__actions">
+        <button type="button" class="btn waiver__cancel" id="waiverCancel" data-en="Cancel" data-es="Cancelar">Cancel</button>
+        <button type="submit" class="btn btn--red waiver__submit" id="waiverSign" disabled>
+          <span data-en="Agree & Sign" data-es="Aceptar y Firmar">Agree &amp; Sign</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Lightbox -->
