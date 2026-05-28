@@ -892,7 +892,7 @@ strong { font-weight: 600; }
 
 @media (min-width: 900px) {
   :root { --nav-h: 72px; }
-  .nav__links { display: flex; align-items: center; gap: 1.6rem; }
+  .nav__links { display: flex; align-items: center; gap: 1.35rem; flex-wrap: nowrap; white-space: nowrap; }
   .nav__links a {
     font-family: var(--font-body); font-size: 0.92rem; font-weight: 500;
     letter-spacing: 0.02em; color: var(--cream); position: relative;
@@ -911,6 +911,17 @@ strong { font-weight: 600; }
   .mobile-bar { display: none; }
   .foot { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
   .why__stats { grid-template-columns: 1fr 1fr; }
+}
+
+/* The full desktop nav (6 links + language toggle + Reserve CTA) needs ~1020px to fit on one
+   line. Between 900-1039px it would wrap to two lines and shove the Reserve button around (looks
+   broken on smaller laptops; fine on wide monitors). In that range, fall back to the hamburger +
+   bottom Reserve bar, which is a clean known-good layout. Full desktop nav only at >=1040px. */
+@media (min-width: 900px) and (max-width: 1039px) {
+  .nav__links { display: none; }
+  .nav__cta { display: none; }
+  .nav__menu-btn { display: inline-flex; }
+  .mobile-bar { display: flex; }
 }
 
 @media (min-width: 1100px) {
