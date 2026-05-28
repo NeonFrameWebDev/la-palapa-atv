@@ -636,6 +636,35 @@ strong { font-weight: 600; }
   padding: clamp(1rem, 4vw, 1.6rem); border-bottom: 1px solid var(--panel-line);
   background: var(--cream);
 }
+/* In-modal EN/ES contract toggle */
+.waiver__contract-lang {
+  display: inline-flex; align-items: center;
+  border: 1.5px solid var(--sand); border-radius: 999px;
+  overflow: hidden; margin: 0 0 1rem;
+  font-family: var(--font-display); font-size: 0.78rem; letter-spacing: 0.08em;
+}
+.waiver__contract-lang-btn {
+  padding: 0.4rem 0.95rem; color: var(--near-black); background: transparent;
+  text-transform: uppercase; transition: background 0.15s ease, color 0.15s ease;
+}
+.waiver__contract-lang-btn:hover { background: rgba(212,137,42,0.12); }
+.waiver__contract-lang-btn.is-active { background: var(--gold); color: var(--ink); }
+.waiver__contract[hidden] { display: none; }
+
+/* Standalone waiver page (waiver.html) — same components as the modal, laid out as a full-page card */
+.page--waiver .waiver-page__body { padding: clamp(1.25rem, 4vw, 2rem); }
+.page--waiver .waiver-page__scroll {
+  background: var(--cream); color: var(--near-black);
+  border: 1.5px solid var(--panel-line); border-radius: var(--radius);
+  padding: clamp(1rem, 3vw, 1.6rem);
+  margin-bottom: 1.4rem;
+  /* Tall contract area; the page itself scrolls, not the inner block */
+}
+.page--waiver .waiver-page__form { color: var(--near-black); }
+.page--waiver .reserve__card.is-success .waiver-page__body { display: none; }
+.page--waiver .reserve__card.is-success .reserve__success { display: block; }
+.page--waiver .waiver__actions { margin-top: 1.4rem; }
+.page--waiver .waiver__submit { width: 100%; }
 .waiver__contract {
   font-family: var(--font-body); /* legal text: legibility over flair */
   font-size: 0.92rem; line-height: 1.6; color: #2a2820;
@@ -810,8 +839,10 @@ strong { font-weight: 600; }
    ========================================================================== */
 .foot { background: var(--ink); border-top: 1px solid rgba(200,169,106,0.18); padding: clamp(2.5rem, 6vw, 4rem) 0 6.5rem; }
 .foot__grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
-.foot__brand img { height: 44px; width: auto; margin-bottom: 0.6rem; }
-.foot__brand .flag-stripe { max-width: 90px; margin-bottom: 0.8rem; }
+.foot__brand a { display: inline-block; }
+.foot__brand img { display: block; height: 44px; width: auto; margin-bottom: 0.6rem; }
+/* Match the rendered logo width so the flag strip sits directly under the logo. Logo aspect 480x320, so at 44px tall it renders 66px wide. */
+.foot__brand .flag-stripe { display: block; width: 66px; margin-bottom: 0.8rem; }
 .foot__brand p { color: var(--cream-dim); font-size: 0.95rem; max-width: 38ch; }
 .foot__col h4 { color: var(--gold); font-size: 0.95rem; letter-spacing: 0.06em; margin-bottom: 0.8rem; }
 .foot__col ul { display: flex; flex-direction: column; gap: 0.5rem; }

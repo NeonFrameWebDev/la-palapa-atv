@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+
+<title data-en="Digital Rental Waiver | La Palapa ATV'S" data-es="Contrato Digital de Renta | La Palapa ATV'S">Digital Rental Waiver | La Palapa ATV'S</title>
+<meta name="description" id="metaDescription" content="Sign La Palapa's rental agreement digitally on your phone before you ride. No paper, signed in seconds, copy emailed to you.">
+<meta name="robots" content="noindex, follow">
+<meta name="author" content="La Palapa ATV'S">
+<meta name="geo.region" content="MX-SON">
+<meta name="geo.placename" content="Puerto Penasco, Sonora">
+
+<link rel="canonical" href="https://neonframewebdev.github.io/la-palapa-atv/waiver.html">
+<link rel="alternate" hreflang="en" href="https://neonframewebdev.github.io/la-palapa-atv/waiver.html">
+<link rel="alternate" hreflang="es" href="https://neonframewebdev.github.io/la-palapa-atv/waiver.html?lang=es">
+<link rel="alternate" hreflang="x-default" href="https://neonframewebdev.github.io/la-palapa-atv/waiver.html">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Digital Rental Waiver | La Palapa ATV'S">
+<meta property="og:description" content="Sign the rental agreement digitally before you ride.">
+<meta property="og:url" content="https://neonframewebdev.github.io/la-palapa-atv/waiver.html">
+<meta property="og:site_name" content="La Palapa ATV'S">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body class="page--waiver">
+
+<a class="skip" href="#main" data-en="Skip to content" data-es="Saltar al contenido">Skip to content</a>
+
+<!-- ===================== Loader (once per session, any page) ===================== -->
+<div class="loader" id="loader" aria-hidden="true">
+  <img class="loader__logo" src="assets/logo_nav.webp" width="480" height="320" alt="">
+  <hr class="flag-stripe loader__stripe">
+  <div class="loader__track"><div class="loader__bar"></div></div>
+  <div class="loader__meta" data-en="Throttle ready" data-es="Listos para arrancar">Throttle ready</div>
+</div>
+
+<div class="progress-top" id="progressTop"></div>
+
+<!-- ===================== Nav ===================== -->
+<nav class="nav is-scrolled" id="nav" aria-label="Primary">
+  <div class="wrap nav__inner">
+    <a class="nav__brand" href="index.html" aria-label="La Palapa ATV'S, home">
+      <img class="nav__logo" src="assets/logo_nav.webp" width="480" height="320" alt="La Palapa ATV'S logo" fetchpriority="high">
+      <span class="flag-stripe" aria-hidden="true"></span>
+    </a>
+    <div class="nav__right">
+      <ul class="nav__links">
+        <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+        <li><a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+        <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+        <li><a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a></li>
+        <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+        <li><a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a></li>
+      </ul>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <a class="btn btn--red nav__cta" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+      <button class="nav__menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <span class="nav__menu-btn__bars" aria-hidden="true"><span></span><span></span></span>
+        <span data-en="Menu" data-es="Menú">Menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Full-screen mobile menu -->
+<aside class="menu" id="menu" aria-label="Site menu">
+  <div class="menu__top">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+    <button class="menu__close" id="menuClose" data-en="Close" data-es="Cerrar">Close</button>
+  </div>
+  <nav class="menu__links" aria-label="Mobile">
+    <a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a>
+    <a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a>
+    <a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a>
+    <a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a>
+    <a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a>
+    <a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a>
+  </nav>
+  <div class="menu__cta">
+    <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  </div>
+</aside>
+
+<main id="main">
+<section class="section section--light section--page-top" id="waiverPage">
+  <div class="wrap">
+
+    <div class="reserve__card" id="waiverPageCard">
+      <div class="reserve__header">
+        <h2 data-en="Digital Rental Waiver" data-es="Contrato Digital de Renta">Digital Rental Waiver</h2>
+        <p class="sub" data-en="Read the agreement, fill in your info, sign, and you're done. No paper. A signed copy emails to you and to La Palapa." data-es="Lee el contrato, llena tus datos, firma y listo. Sin papel. Te enviamos una copia firmada por correo a ti y a La Palapa.">Read the agreement, fill in your info, sign, and you're done. No paper. A signed copy emails to you and to La Palapa.</p>
+      </div>
+
+      <div class="reserve__body waiver-page__body">
+
+        <!-- ===== Contract (with EN/ES toggle) ===== -->
+        <div class="waiver-page__scroll">
+          <div class="waiver__contract-lang" role="group" aria-label="Contract language">
+            <button type="button" id="waiverLangEn" class="waiver__contract-lang-btn is-active" data-contract-lang="en" aria-pressed="true">English</button>
+            <button type="button" id="waiverLangEs" class="waiver__contract-lang-btn" data-contract-lang="es" aria-pressed="false">Español</button>
+          </div>
+
+          <!-- BEGIN VERBATIM CONTRACT TEXT (English). Source: La_Palapa_ATVs_Contract.webp. DO NOT EDIT. -->
+          <div class="waiver__contract waiver__contract--en" id="waiverContractEn">
+            <p class="waiver__c-brand">LA PALAPA RENTALS</p>
+            <p>CONTRATO DE RENTA DE RZR, CAN-AM. - That celebrate, on the one hand, the business LA PALAPA RZR &amp; ATV RENTALS, and on the other hand, THE CUSTOMER, who agrees on the rent consisting of:</p>
+
+            <p class="waiver__c-h">UNDER THE FOLLOWING CONDITIONS OR REGULATIONS FOR ITS USE:</p>
+            <ul>
+              <li>Shall be driven by people of legal age, and he/she shall have a driver's license</li>
+              <li>Obey all traffic signals and use the helmet given as a protective measure</li>
+              <li>Do not carry more than 4 people per RZR or Can-Am</li>
+              <li>Do not put the unit(s) into water, mud, or the sea water</li>
+              <li>Do not drive in the mountain called La Choya</li>
+              <li>Do not consume alcohol, drugs or substances that may prevent you from having full physical and mental capacity</li>
+              <li>The unit shall be delivered at the agreed time, any delay generates extra cost</li>
+              <li>There is no refund for delivering the unit before the agreed time</li>
+            </ul>
+
+            <p class="waiver__c-h">EXTRA PAYMENT FOR DAMAGES:</p>
+            <ul>
+              <li>For putting the unit in water or mud from $500.00 DLLS</li>
+              <li>Broken bars due to mishandling, crash or rollover $500.00 DLLS each</li>
+              <li>Damages in general caused by mishandling, crash or rollover start at: RZR or CAN-AM starting at $4,000.00 DLLS per service up to $38,000.00 DLLS for complete loss plus damages</li>
+            </ul>
+
+            <p class="waiver__c-h">LIABILITY. - THE CUSTOMER drives at his/her own risk, LA PALAPA RENTALS, has not contracted any insurance policy for civil liability or damages, therefore, THE CUSTOMER:</p>
+            <ul>
+              <li>is fully responsible and is bound to respond including and excludes for any damages or accident (including death) caused by mishandling, crash or rollover, by him/her or by the people he/she allows to drive the unit during the time of rental of the unit or while it is in possession, whether to third parties involved traveling in the unit or not, or to him/herself.</li>
+              <li>Is bound and agrees to respond for any mechanical and physical damages caused to the rental unit, or to any other involved.</li>
+              <li>Is bound and agrees to respond for damages caused to public or private property, as well as violations of traffic regulations</li>
+              <li>The insurance policy that the customer may have for his/her private vehicle does not apply to the rented unit nor does it cover damages caused.</li>
+            </ul>
+
+            <p class="waiver__c-h">WARRANTY. - THE CUSTOMER as a guarantee that he/she will be liable for all damages that could be caused by mishandling, collision or overturning; in this contract, gives as deposit and guarantee the vehicle with the following characteristics ____________; same that will be returned to cover the total cost of the damage(s) caused.</p>
+
+            <p class="waiver__c-staff" aria-hidden="true"><span>Vehicle characteristics (filled in by staff at pickup):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+
+            <p class="waiver__c-sign-line">The customer declares to have read and fully acknowledges the content of this contract, in Puerto Penasco, Sonora on the <span id="waiverContractDateEn" class="waiver__c-date">[date]</span> ; therefore, it is recorded by signing at the bottom of this document.</p>
+          </div>
+
+          <!-- BEGIN VERBATIM CONTRACT TEXT (Spanish). Source: IMG_0322.jpeg. DO NOT EDIT. -->
+          <div class="waiver__contract waiver__contract--es" id="waiverContractEs" hidden>
+            <p class="waiver__c-brand">LA PALAPA RENTALS</p>
+            <p>CONTRATO DE RENTA DE MOTOS, RHINOS. - Que celebran por una parte, el negocio comercial LA PALAPA RZR &amp; ATV RENTALS, y por otra parte, EL CLIENTE, quienes pactan la renta consistente en: Moto.</p>
+
+            <p class="waiver__c-h">BAJO LAS SIGUIENTES CONDICIONES O REGLAMENTO DE USO:</p>
+            <ul>
+              <li>Deberá ser conducida por personas mayores de edad y que cuente con licencia de manejo</li>
+              <li>Obedecer todas las señales de tránsito y usar el casco otorgado como medida de protección</li>
+              <li>No subir más de 4 personas</li>
+              <li>No meter las unidades a agua, lodo, o al mar</li>
+              <li>No conducir en la montaña denominada La Choya</li>
+              <li>No consumir alcohol, drogas o sustancias que puedan impedir tener plena capacidad física y mental</li>
+              <li>La unidad deberá ser entregada en la hora acordada, cualquier retraso genera costo extra</li>
+              <li>No hay reembolso por entregar la unidad antes del tiempo acordado</li>
+            </ul>
+
+            <p class="waiver__c-h">PAGO EXTRA POR DAÑOS:</p>
+            <ul>
+              <li>Por meter la unidad al agua o lodo desde $500 DLLS</li>
+              <li>Por daños generales ocasionados por mal manejo, choque o volcadura: barras desde los $200 DLLS por servicio más los daños ocasionados; Rhinos desde $1,500 DLLS por servicio más los daños ocasionados</li>
+            </ul>
+
+            <p class="waiver__c-h">RESPONSABILIDAD. - EL CLIENTE conduce bajo su propio riesgo. LA PALAPA RENTALS no tiene contratada ninguna póliza de seguro por responsabilidad civil ni daños; por lo tanto, EL CLIENTE:</p>
+            <ul>
+              <li>Se hace totalmente responsable y se compromete a responder en forma exclusiva y excluyente de cualquier accidente (incluyendo la muerte), ocasionado por mal manejo, choque o volcadura, por sí, o por las personas a las que se le permita conducir la unidad durante el lapso de la renta de la unidad o mientras esté en su poder, ya sea a terceras personas involucradas viajen o no en la unidad, o a sí mismo.</li>
+              <li>Se hace responsable y se compromete a responder por los daños mecánicos y físicos ocasionados a la unidad rentada y a cualquier otra involucrada.</li>
+              <li>Se hace responsable y se compromete a responder por los daños causados a propiedad pública o privada, así como infracciones al reglamento de tránsito.</li>
+              <li>La póliza de seguro que el cliente posee de su vehículo particular no aplica en la unidad rentada ni cubre daños ocasionales.</li>
+            </ul>
+
+            <p class="waiver__c-h">GARANTÍA. - EL CLIENTE como garantía de que responderá por todos los daños que pudiera ocasionar por mal manejo, choque o volcadura, mediante este contrato deja en depósito y garantía el vehículo con las siguientes características ____________; mismo que se devolverá al cubrir el costo total de los daños ocasionados.</p>
+
+            <p class="waiver__c-staff" aria-hidden="true"><span>Características del vehículo (las llena el personal al recoger):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+
+            <p class="waiver__c-sign-line">El cliente declara haber leído y entendido en su totalidad el contenido del presente contrato, en Puerto Peñasco, Sonora, el <span id="waiverContractDateEs" class="waiver__c-date">[fecha]</span>; por lo que lo hace constar mediante su firma al calce del presente documento.</p>
+          </div>
+        </div>
+
+        <!-- ===== Form: customer data + signature ===== -->
+        <form class="waiver__form waiver-page__form" id="waiverForm" novalidate
+              action="https://formsubmit.co/becca@neonframewebdesign.com"
+              method="POST" enctype="multipart/form-data">
+
+          <h3 class="waiver__sec" data-en="Customer Data" data-es="Datos del Cliente">Customer Data</h3>
+          <div class="waiver-grid">
+            <div class="field field--full">
+              <label for="wName"><span data-en="Full name" data-es="Nombre completo">Full name</span> <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="wName" name="wName" autocomplete="name" required aria-required="true" aria-describedby="wNameErr">
+              <span class="field__error" id="wNameErr" data-en="Enter your full legal name." data-es="Escribe tu nombre legal completo.">Enter your full legal name.</span>
+            </div>
+            <div class="field">
+              <label for="wPhone"><span data-en="Telephone" data-es="Teléfono">Telephone</span> <span class="req" aria-hidden="true">*</span></label>
+              <input type="tel" id="wPhone" name="wPhone" autocomplete="tel" inputmode="tel" required aria-required="true" aria-describedby="wPhoneErr">
+              <span class="field__error" id="wPhoneErr" data-en="Enter a telephone number." data-es="Escribe un número de teléfono.">Enter a telephone number.</span>
+            </div>
+            <div class="field">
+              <label for="wEmail"><span data-en="Email" data-es="Correo">Email</span> <span class="opt" data-en="(to email you a copy)" data-es="(para mandarte una copia)">(to email you a copy)</span></label>
+              <input type="email" id="wEmail" name="wEmail" autocomplete="email"
+                     data-placeholder-en="you@email.com" data-placeholder-es="tu@correo.com" placeholder="you@email.com">
+            </div>
+            <div class="field">
+              <label for="wAddress"><span data-en="Address" data-es="Dirección">Address</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <input type="text" id="wAddress" name="wAddress" autocomplete="street-address">
+            </div>
+            <div class="field">
+              <label for="wHotel"><span data-en="Hotel" data-es="Hotel">Hotel</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <input type="text" id="wHotel" name="wHotel">
+            </div>
+            <div class="field">
+              <label for="wRoom"><span data-en="Room No." data-es="No. de Habitación">Room No.</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <input type="text" id="wRoom" name="wRoom" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="wCheckin"><span data-en="Check-in" data-es="Entrada">Check-in</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <input type="date" id="wCheckin" name="wCheckin">
+            </div>
+            <div class="field">
+              <label for="wCheckout"><span data-en="Check-out" data-es="Salida">Check-out</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <input type="date" id="wCheckout" name="wCheckout">
+            </div>
+          </div>
+
+          <p class="waiver__signed-place" id="waiverSignedPlace">
+            <span data-en="Signed in Puerto Penasco, Sonora on" data-es="Firmado en Puerto Peñasco, Sonora el">Signed in Puerto Penasco, Sonora on</span>
+            <span class="waiver__signed-date" id="waiverSignDate"></span>
+          </p>
+
+          <label class="waiver__agree" for="wAgree">
+            <input type="checkbox" id="wAgree" name="wAgree" required aria-required="true" aria-describedby="wAgreeErr">
+            <span data-en="I have read and fully acknowledge the content of this contract and agree to its terms." data-es="He leído y reconozco plenamente el contenido de este contrato y acepto sus términos.">I have read and fully acknowledge the content of this contract and agree to its terms.</span>
+          </label>
+          <span class="field__error waiver__agree-err" id="wAgreeErr" data-en="You must agree to the terms to sign." data-es="Debes aceptar los términos para firmar.">You must agree to the terms to sign.</span>
+
+          <h3 class="waiver__sec" data-en="Signature" data-es="Firma">Signature</h3>
+          <p class="waiver__sig-help" data-en="Sign by drawing below, or type your full legal name. Either one counts as your signature." data-es="Firma dibujando abajo, o escribe tu nombre legal completo. Cualquiera de las dos cuenta como tu firma.">Sign by drawing below, or type your full legal name. Either one counts as your signature.</p>
+
+          <div class="waiver__sig">
+            <div class="waiver__sig-canvas-wrap">
+              <canvas id="waiverCanvas" class="waiver__sig-canvas" width="600" height="180"
+                      role="img" aria-label="Draw your signature here" tabindex="0"></canvas>
+              <span class="waiver__sig-baseline" aria-hidden="true"></span>
+              <span class="waiver__sig-placeholder" id="waiverSigPlaceholder" aria-hidden="true"
+                    data-en="Draw your signature here" data-es="Dibuja tu firma aquí">Draw your signature here</span>
+            </div>
+            <button type="button" class="waiver__sig-clear" id="waiverSigClear"
+                    data-en="Clear" data-es="Borrar">Clear</button>
+          </div>
+
+          <div class="field field--full waiver__typed">
+            <label for="wTypedSig"><span data-en="Or type your full legal name to sign" data-es="O escribe tu nombre legal completo para firmar">Or type your full legal name to sign</span></label>
+            <input type="text" id="wTypedSig" name="wTypedSig" autocomplete="off" aria-describedby="wSigErr"
+                   data-placeholder-en="Type your full legal name" data-placeholder-es="Escribe tu nombre legal completo" placeholder="Type your full legal name">
+          </div>
+          <span class="field__error waiver__sig-err" id="wSigErr" data-en="Add a signature: draw above or type your full legal name." data-es="Agrega una firma: dibuja arriba o escribe tu nombre legal completo.">Add a signature: draw above or type your full legal name.</span>
+
+          <!-- Honeypot for spam bots -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="wWebsite">Website (leave blank)</label>
+            <input type="text" id="wWebsite" name="_honey" tabindex="-1" autocomplete="off">
+          </div>
+          <!-- FormSubmit config -->
+          <input type="hidden" name="_subject" id="wFsSubject" value="La Palapa: signed waiver">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_cc" id="wFsCc" value="">
+          <input type="hidden" name="_replyto" id="wFsReplyto" value="">
+          <input type="hidden" name="_autoresponse" id="wFsAutoresponse" value="">
+          <input type="hidden" name="_next" value="https://neonframewebdev.github.io/la-palapa-atv/waiver.html?signed=1">
+
+          <div class="form-error-notice" id="formError" role="alert">
+            <p class="form-error__msg" data-en="We could not send that just now. Don't worry, your signature is not lost. Send it through one of these instead and we'll confirm right away:" data-es="No pudimos enviar eso ahora. No te preocupes, tu firma no se perdió. Mándala por una de estas opciones y te confirmamos enseguida:">We could not send that just now. Don't worry, your signature is not lost. Send it through one of these instead and we'll confirm right away:</p>
+            <div class="form-error__buttons">
+              <a class="btn btn--red form-error__btn" id="formErrorWhatsapp" href="#" target="_blank" rel="noopener" data-en="Send on WhatsApp" data-es="Enviar por WhatsApp">Send on WhatsApp</a>
+              <a class="btn btn--dark form-error__btn" id="formErrorMailto" href="#" data-en="Send by email" data-es="Enviar por correo">Send by email</a>
+              <button type="button" class="btn btn--ghost form-error__btn" id="formErrorRetry" data-en="Try again" data-es="Reintentar">Try again</button>
+            </div>
+            <p class="form-error__phone" data-en="Or call us at 638-112-4485 and we'll get it sorted." data-es="O llámanos al 638-112-4485 y lo resolvemos.">Or call us at 638-112-4485 and we'll get it sorted.</p>
+          </div>
+
+          <div class="waiver__actions">
+            <button type="submit" class="btn btn--red waiver__submit" id="waiverSign" disabled>
+              <span class="btn-label" data-en="Agree & Sign" data-es="Aceptar y Firmar">Agree &amp; Sign</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Success state -->
+      <div class="reserve__success" id="waiverSuccess" role="status" aria-live="polite">
+        <div class="success-check" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="sx-title" data-en="Signed!" data-es="¡Firmado!">Signed!</p>
+        <p class="sx-body" id="waiverSuccessBody" data-en="Your signed waiver is sent. Check your email for your copy. Have fun on the sand." data-es="Tu contrato firmado fue enviado. Revisa tu correo para tu copia. Diviértete en la arena.">Your signed waiver is sent. Check your email for your copy. Have fun on the sand.</p>
+        <button type="button" class="sx-reset" id="waiverReset" data-en="Sign another" data-es="Firmar otro">Sign another</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===================== Footer ===================== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <a href="index.html" aria-label="La Palapa ATV'S, home"><img src="assets/logo_nav.webp" width="480" height="320" loading="lazy" alt="La Palapa ATV'S logo"></a>
+        <span class="flag-stripe" aria-hidden="true"></span>
+        <p data-en="ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them." data-es="Renta de ATV y side-by-side en Puerto Peñasco, Rocky Point. Dunas, playa y 45 formas de recorrerlas.">ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them.</p>
+        <p class="foot__signoff" data-en="See you in the dunes." data-es="Nos vemos en las dunas.">See you in the dunes.</p>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Explore" data-es="Explora">Explore</h4>
+        <ul>
+          <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+          <li><a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+          <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+          <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+          <li><a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a></li>
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Contact" data-es="Contacto">Contact</h4>
+        <ul>
+          <li><a href="tel:+526381124485">638-112-4485</a></li>
+          <li><a href="tel:+526381094266">638-109-4266</a></li>
+          <li><a class="foot__ig" href="https://www.instagram.com/la_palapa_rentals4/" target="_blank" rel="noopener" aria-label="Instagram @la_palapa_rentals4"><svg class="ig-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.07 1.17.05 1.96.24 2.65.51.72.28 1.33.66 1.94 1.27.61.61.99 1.22 1.27 1.94.27.69.46 1.48.51 2.65.06 1.2.07 1.6.07 4.8s0 3.6-.07 4.8c-.05 1.17-.24 1.96-.51 2.65-.28.72-.66 1.33-1.27 1.94-.61.61-1.22.99-1.94 1.27-.69.27-1.48.46-2.65.51-1.2.06-1.6.07-4.8.07s-3.6 0-4.8-.07c-1.17-.05-1.96-.24-2.65-.51-.72-.28-1.33-.66-1.94-1.27-.61-.61-.99-1.22-1.27-1.94-.27-.69-.46-1.48-.51-2.65C2.21 15.6 2.2 15.2 2.2 12s0-3.6.07-4.8c.05-1.17.24-1.96.51-2.65.28-.72.66-1.33 1.27-1.94.61-.61 1.22-.99 1.94-1.27.69-.27 1.48-.46 2.65-.51C8.4 2.21 8.8 2.2 12 2.2zm0 1.8c-3.13 0-3.5.01-4.74.07-.97.04-1.5.21-1.85.34-.47.18-.8.4-1.15.75-.35.35-.57.68-.75 1.15-.14.36-.3.88-.34 1.85-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.04.97.21 1.5.34 1.85.18.47.4.8.75 1.15.35.35.68.57 1.15.75.36.14.88.3 1.85.34 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c.97-.04 1.5-.21 1.85-.34.47-.18.8-.4 1.15-.75.35-.35.57-.68.75-1.15.14-.36.3-.88.34-1.85.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.04-.97-.21-1.5-.34-1.85a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.88-.3-1.85-.34C15.5 4.01 15.13 4 12 4zm0 3.06A4.94 4.94 0 1 1 12 17a4.94 4.94 0 0 1 0-9.94zm0 1.8a3.14 3.14 0 1 0 0 6.28 3.14 3.14 0 0 0 0-6.28zm5.15-2.86a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3z"/></svg><span class="foot__ig-handle">@la_palapa_rentals4</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>&copy; <span id="year">2026</span> La Palapa ATV'S</span>
+      <span><span data-en="Site by " data-es="Sitio por ">Site by </span><a href="https://neonframewebdesign.com" target="_blank" rel="noopener">NeonFrame Web Design</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile pinned action bar -->
+<div class="mobile-bar" aria-label="Quick actions">
+  <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  <a class="icon-btn" href="tel:+526381124485" aria-label="Call La Palapa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+  </a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>

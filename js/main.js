@@ -862,12 +862,40 @@
   var signDate = buildSignDate();
 
   function paintSignDate() {
-    var human = currentLang === 'es' ? signDate.es : signDate.en;
-    var contractDate = document.getElementById('waiverContractDate');
+    // Paint EN date format in the EN contract, ES date format in the ES contract.
+    // The "signed in Puerto Penasco..." footer line under the form mirrors the page language.
+    var enDate = document.getElementById('waiverContractDateEn');
+    var esDate = document.getElementById('waiverContractDateEs');
+    if (enDate) enDate.textContent = signDate.en;
+    if (esDate) esDate.textContent = signDate.es;
     var signDateEl = document.getElementById('waiverSignDate');
-    if (contractDate) contractDate.textContent = human;
-    if (signDateEl) signDateEl.textContent = human;
+    if (signDateEl) signDateEl.textContent = currentLang === 'es' ? signDate.es : signDate.en;
   }
+
+  /* ---- contract-language toggle inside the modal ---- */
+  // Persist the user's choice for the session so a re-open shows what they last picked.
+  var contractLang = null;
+  function setContractLang(lang, opts) {
+    if (lang !== 'en' && lang !== 'es') lang = 'en';
+    contractLang = lang;
+    var en = document.getElementById('waiverContractEn');
+    var es = document.getElementById('waiverContractEs');
+    if (en) en.hidden = (lang !== 'en');
+    if (es) es.hidden = (lang !== 'es');
+    var btnEn = document.getElementById('waiverLangEn');
+    var btnEs = document.getElementById('waiverLangEs');
+    if (btnEn) { btnEn.classList.toggle('is-active', lang === 'en'); btnEn.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false'); }
+    if (btnEs) { btnEs.classList.toggle('is-active', lang === 'es'); btnEs.setAttribute('aria-pressed', lang === 'es' ? 'true' : 'false'); }
+    if (opts && opts.persist) safeStorageSet('sessionStorage', 'lp_waiver_lang', lang);
+    // Scroll the contract back to top so the user sees the new version from the top.
+    var scroll = document.querySelector('.waiver__scroll');
+    if (scroll && opts && opts.scrollTop) scroll.scrollTop = 0;
+  }
+  // Wire the in-modal EN/ES buttons
+  var waiverLangBtnEn = document.getElementById('waiverLangEn');
+  var waiverLangBtnEs = document.getElementById('waiverLangEs');
+  if (waiverLangBtnEn) waiverLangBtnEn.addEventListener('click', function () { setContractLang('en', { persist: true, scrollTop: true }); });
+  if (waiverLangBtnEs) waiverLangBtnEs.addEventListener('click', function () { setContractLang('es', { persist: true, scrollTop: true }); });
 
   /* ---- signature canvas (lightweight vanilla) ---- */
   var sigCtx = null, sigDrawing = false, sigHasInk = false, sigLastX = 0, sigLastY = 0;
@@ -979,6 +1007,12 @@
     waiverLastFocused = document.activeElement;
     paintSignDate();
     prefillWaiver();
+    // Default contract language: a session-persisted user choice wins; otherwise match the page language.
+    var savedContractLang = safeStorageGet('sessionStorage', 'lp_waiver_lang');
+    var defaultLang = (savedContractLang === 'en' || savedContractLang === 'es')
+      ? savedContractLang
+      : (currentLang === 'es' ? 'es' : 'en');
+    setContractLang(defaultLang);
     waiverModal.removeAttribute('hidden');
     document.body.classList.add('is-locked');
     document.addEventListener('keydown', onWaiverKeydown);
@@ -1046,9 +1080,152 @@
         signedAtISO: new Date().toISOString()
       };
 
-      markWaiverSigned(signerName);
-      closeWaiver();
+      // Branch: are we on the standalone waiver page (waiver.html), or inside the reservation modal?
+      if (document.body.classList.contains('page--waiver')) {
+        submitStandaloneWaiver();
+      } else {
+        markWaiverSigned(signerName);
+        closeWaiver();
+      }
     });
+  }
+
+  /* ---- standalone waiver submit (walk-in flow, waiver.html) ----
+     Posts the signed waiver directly to FormSubmit. Owner gets the email + PNG;
+     customer is CC'd if they entered an email; auto-response sends customer a confirmation. */
+  function submitStandaloneWaiver() {
+    var btn = document.getElementById('waiverSign');
+    var label = btn ? btn.querySelector('.btn-label') : null;
+    var sendingText = currentLang === 'es' ? 'Enviando...' : 'Sending...';
+    if (btn) btn.disabled = true;
+    if (label) {
+      label.textContent = '';
+      var sp = document.createElement('span');
+      sp.className = 'spinner';
+      sp.setAttribute('aria-hidden', 'true');
+      label.appendChild(sp);
+      label.appendChild(document.createTextNode(' ' + sendingText));
+    }
+    var notice = document.getElementById('formError');
+    if (notice) notice.classList.remove('is-shown');
+
+    var wEmail = document.getElementById('wEmail');
+    var emailVal = wEmail ? safeStr(wEmail.value, 254) : '';
+    var honey = document.getElementById('wWebsite');
+    if (honey && honey.value) { showStandaloneWaiverSuccess(); return; }
+
+    var subjEl = document.getElementById('wFsSubject');
+    var ccEl = document.getElementById('wFsCc');
+    var replytoEl = document.getElementById('wFsReplyto');
+    var autoEl = document.getElementById('wFsAutoresponse');
+    var c = (waiverData && waiverData.customer) || {};
+    if (subjEl) subjEl.value = 'La Palapa Waiver: ' + (waiverData.signerName || 'walk-in');
+    if (ccEl) ccEl.value = emailVal;
+    if (replytoEl) replytoEl.value = emailVal;
+    var autoLines = (currentLang === 'es'
+      ? ['Hola ' + (waiverData.signerName || '') + ',', '', 'Adjunto está tu copia del contrato firmado de La Palapa ATV. Diviértete en la arena.', '', 'La Palapa ATV']
+      : ['Hi ' + (waiverData.signerName || '') + ',', '', 'Attached is your copy of the signed La Palapa ATV waiver. Have fun on the sand.', '', 'La Palapa ATV']
+    );
+    if (autoEl) autoEl.value = autoLines.join('\n');
+
+    var fd = new FormData();
+    fd.append('Signer name', waiverData.signerName);
+    fd.append('Telephone', safeStr(c.telephone, 40));
+    fd.append('Email', emailVal);
+    fd.append('Address', safeStr(c.address, 200));
+    fd.append('Hotel', safeStr(c.hotel, 120));
+    fd.append('Room', safeStr(c.roomNo, 20));
+    fd.append('Check-in', safeStr(c.checkin));
+    fd.append('Check-out', safeStr(c.checkout));
+    fd.append('Waiver signed at (ISO)', safeStr(waiverData.signedAtISO));
+    fd.append('Waiver signed place', safeStr(waiverData.signedPlace));
+    fd.append('Signature type', safeStr(waiverData.signatureType));
+    fd.append('Agreement', waiverData.agreement ? 'true' : 'false');
+    if (waiverData.signatureType === 'drawn') {
+      var blob = dataURLToBlob(waiverData.signature);
+      if (blob) {
+        var fname = 'signature-' + (waiverData.signerName || 'customer').replace(/[^a-z0-9_-]+/gi, '_') + '.png';
+        fd.append('signature_image', blob, fname);
+      } else {
+        fd.append('signature_data_url', safeStr(waiverData.signature, 100000));
+      }
+    } else {
+      fd.append('Typed signature', safeStr(waiverData.signature, 120));
+    }
+    fd.set('_subject', subjEl ? subjEl.value : 'La Palapa Waiver');
+    fd.set('_template', 'table');
+    fd.set('_captcha', 'false');
+    if (emailVal) {
+      fd.set('_cc', emailVal);
+      fd.set('_replyto', emailVal);
+    }
+    fd.set('_autoresponse', autoEl ? autoEl.value : '');
+    fd.set('_honey', safeStr(honey && honey.value));
+
+    postBooking(fd).then(function () {
+      showStandaloneWaiverSuccess();
+    }, function () {
+      // Re-enable submit + show fallback UI
+      if (btn) btn.disabled = false;
+      if (label) label.textContent = currentLang === 'es' ? 'Aceptar y Firmar' : 'Agree & Sign';
+      var b = { name: waiverData.signerName, phone: c.telephone, email: emailVal, vehicle: '', startTime: '', endTime: '', date: '' };
+      var summary = buildBookingSummary(b, currentLang) +
+        (currentLang === 'es'
+          ? '\n\n(Contrato firmado digitalmente. Por favor envía esta confirmación a La Palapa para que tu firma quede registrada.)'
+          : '\n\n(Waiver signed digitally. Please send this confirmation to La Palapa so your signature is on record.)');
+      var wa = document.getElementById('formErrorWhatsapp');
+      var ml = document.getElementById('formErrorMailto');
+      if (wa) wa.setAttribute('href', buildWhatsappURL(summary));
+      if (ml) ml.setAttribute('href', buildMailtoURL(summary, b));
+      if (notice) notice.classList.add('is-shown');
+      var y = notice.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
+      window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+
+  function showStandaloneWaiverSuccess() {
+    var card = document.getElementById('waiverPageCard');
+    if (card) card.classList.add('is-success');
+    var success = document.getElementById('waiverSuccess');
+    if (success && card) {
+      success.setAttribute('tabindex', '-1');
+      try { success.focus({ preventScroll: true }); } catch (e) {}
+      var y = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
+      window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+  }
+
+  // Standalone-waiver "Sign another" reset, used by the owner between walk-ins
+  var waiverResetBtn = document.getElementById('waiverReset');
+  if (waiverResetBtn) {
+    waiverResetBtn.addEventListener('click', function () {
+      var card = document.getElementById('waiverPageCard');
+      if (card) card.classList.remove('is-success');
+      if (waiverForm) waiverForm.reset();
+      sigClear();
+      waiverData = null;
+      var btn = document.getElementById('waiverSign');
+      if (btn) btn.disabled = true;
+      var label = btn ? btn.querySelector('.btn-label') : null;
+      if (label) label.textContent = currentLang === 'es' ? 'Aceptar y Firmar' : 'Agree & Sign';
+      $$('#waiverForm .field').forEach(function (f) { f.classList.remove('has-error'); });
+      var agreeErr = document.getElementById('wAgreeErr');
+      var sigErr = document.getElementById('wSigErr');
+      if (agreeErr) agreeErr.classList.remove('is-shown');
+      if (sigErr) sigErr.classList.remove('is-shown');
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+
+  // Standalone-waiver: detect ?signed=1 from native-form fallback redirect
+  if (document.body.classList.contains('page--waiver')) {
+    try {
+      var sp = new URLSearchParams(window.location.search);
+      if (sp.get('signed') === '1') {
+        try { history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
+        setTimeout(showStandaloneWaiverSuccess, 200);
+      }
+    } catch (e) { /* harmless */ }
   }
 
   function markWaiverSigned(name) {

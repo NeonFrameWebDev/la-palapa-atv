@@ -385,12 +385,11 @@
 </div>
 <!-- ===================== Rental Agreement / Waiver modal =====================
      Focus-trapped dialog. Opened from the reservation form's "Read & sign the rental waiver".
-     The CONTRACT BODY is the owner's ACTUAL legal document, reproduced VERBATIM in English.
-     DO NOT paraphrase, summarize, "improve," or machine-translate the legal text.
-     i18n note: only the UI chrome (labels/buttons/headings around the contract) gets EN/ES via
-     data-en/data-es. The contract body stays in English on purpose.
-     TODO (owner): supply an OFFICIAL Spanish-language version of this contract to display for
-     Spanish-speaking customers. Until then the English legal text is the binding document shown. -->
+     The CONTRACT BODIES are the owner's ACTUAL legal documents in both languages, reproduced
+     verbatim from the paper contracts the owner provided (English: La_Palapa_ATVs_Contract.webp,
+     Spanish: IMG_0322.jpeg). DO NOT paraphrase, summarize, "improve," or re-translate the legal text.
+     Customer can toggle between EN and ES with the buttons inside the modal; the default shown
+     matches the page's current language. -->
 <div class="waiver" id="waiverModal" role="dialog" aria-modal="true" aria-labelledby="waiverTitle" aria-describedby="waiverSub" hidden>
   <div class="waiver__overlay" id="waiverOverlay" aria-hidden="true"></div>
   <div class="waiver__dialog" role="document">
@@ -403,13 +402,18 @@
     </header>
 
     <div class="waiver__scroll">
+      <!-- Language toggle for the contract body. Default shown matches page language. -->
+      <div class="waiver__contract-lang" role="group" aria-label="Contract language">
+        <button type="button" id="waiverLangEn" class="waiver__contract-lang-btn is-active" data-contract-lang="en" aria-pressed="true">English</button>
+        <button type="button" id="waiverLangEs" class="waiver__contract-lang-btn" data-contract-lang="es" aria-pressed="false">Español</button>
+      </div>
+
       <!-- ============================================================
-           BEGIN VERBATIM CONTRACT TEXT (English, owner's actual document).
-           Reproduced character-for-character. Set in Inter for legibility.
-           DO NOT EDIT THE WORDING. The {{TODAY}} token is replaced at open time
-           by the auto-filled signing date in the signing line below.
+           BEGIN VERBATIM CONTRACT TEXT (English version).
+           Source: La_Palapa_ATVs_Contract.webp (owner's paper contract).
+           Reproduced character-for-character. DO NOT EDIT.
            ============================================================ -->
-      <div class="waiver__contract" id="waiverContract">
+      <div class="waiver__contract waiver__contract--en" id="waiverContractEn">
         <p class="waiver__c-brand">LA PALAPA RENTALS</p>
         <p>CONTRATO DE RENTA DE RZR, CAN-AM. - That celebrate, on the one hand, the business LA PALAPA RZR &amp; ATV RENTALS, and on the other hand, THE CUSTOMER, who agrees on the rent consisting of:</p>
 
@@ -443,15 +447,56 @@
         <p class="waiver__c-h">WARRANTY. - THE CUSTOMER as a guarantee that he/she will be liable for all damages that could be caused by mishandling, collision or overturning; in this contract, gives as deposit and guarantee the vehicle with the following characteristics ____________; same that will be returned to cover the total cost of the damage(s) caused.</p>
 
         <!-- The WARRANTY "characteristics ___" blank is filled in by staff at pickup, not the online customer. -->
-        <p class="waiver__c-staff" aria-hidden="true"><span data-en="Vehicle characteristics (filled in by staff at pickup):" data-es="Características del vehículo (las llena el personal al recoger):">Vehicle characteristics (filled in by staff at pickup):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+        <p class="waiver__c-staff" aria-hidden="true"><span>Vehicle characteristics (filled in by staff at pickup):</span> <span class="waiver__c-blank">____________________________________________</span></p>
 
-        <p class="waiver__c-sign-line">The customer declares to have read and fully acknowledges the content of this contract, in Puerto Penasco, Sonora on the <span id="waiverContractDate" class="waiver__c-date">[date]</span> ; therefore, it is recorded by signing at the bottom of this document.</p>
+        <p class="waiver__c-sign-line">The customer declares to have read and fully acknowledges the content of this contract, in Puerto Penasco, Sonora on the <span id="waiverContractDateEn" class="waiver__c-date">[date]</span> ; therefore, it is recorded by signing at the bottom of this document.</p>
       </div>
-      <!-- END VERBATIM CONTRACT TEXT -->
+      <!-- END ENGLISH CONTRACT TEXT -->
 
-      <!-- Small bilingual note. ONLY this note is translated; the contract clauses above stay English.
-           An OFFICIAL Spanish legal version is pending from the owner (do NOT auto-translate the clauses). -->
-      <p class="waiver__c-note" data-en="Official Spanish version available at pickup." data-es="Versión oficial en español disponible al recoger.">Official Spanish version available at pickup.</p>
+      <!-- ============================================================
+           BEGIN VERBATIM CONTRACT TEXT (Spanish version).
+           Source: IMG_0322.jpeg (owner's paper contract in Spanish).
+           Transcribed character-for-character; owner should verify final wording.
+           DO NOT EDIT THE WORDING.
+           ============================================================ -->
+      <div class="waiver__contract waiver__contract--es" id="waiverContractEs" hidden>
+        <p class="waiver__c-brand">LA PALAPA RENTALS</p>
+        <p>CONTRATO DE RENTA DE MOTOS, RHINOS. - Que celebran por una parte, el negocio comercial LA PALAPA RZR &amp; ATV RENTALS, y por otra parte, EL CLIENTE, quienes pactan la renta consistente en: Moto.</p>
+
+        <p class="waiver__c-h">BAJO LAS SIGUIENTES CONDICIONES O REGLAMENTO DE USO:</p>
+        <ul>
+          <li>Deberá ser conducida por personas mayores de edad y que cuente con licencia de manejo</li>
+          <li>Obedecer todas las señales de tránsito y usar el casco otorgado como medida de protección</li>
+          <li>No subir más de 4 personas</li>
+          <li>No meter las unidades a agua, lodo, o al mar</li>
+          <li>No conducir en la montaña denominada La Choya</li>
+          <li>No consumir alcohol, drogas o sustancias que puedan impedir tener plena capacidad física y mental</li>
+          <li>La unidad deberá ser entregada en la hora acordada, cualquier retraso genera costo extra</li>
+          <li>No hay reembolso por entregar la unidad antes del tiempo acordado</li>
+        </ul>
+
+        <p class="waiver__c-h">PAGO EXTRA POR DAÑOS:</p>
+        <ul>
+          <li>Por meter la unidad al agua o lodo desde $500 DLLS</li>
+          <li>Por daños generales ocasionados por mal manejo, choque o volcadura: barras desde los $200 DLLS por servicio más los daños ocasionados; Rhinos desde $1,500 DLLS por servicio más los daños ocasionados</li>
+        </ul>
+
+        <p class="waiver__c-h">RESPONSABILIDAD. - EL CLIENTE conduce bajo su propio riesgo. LA PALAPA RENTALS no tiene contratada ninguna póliza de seguro por responsabilidad civil ni daños; por lo tanto, EL CLIENTE:</p>
+        <ul>
+          <li>Se hace totalmente responsable y se compromete a responder en forma exclusiva y excluyente de cualquier accidente (incluyendo la muerte), ocasionado por mal manejo, choque o volcadura, por sí, o por las personas a las que se le permita conducir la unidad durante el lapso de la renta de la unidad o mientras esté en su poder, ya sea a terceras personas involucradas viajen o no en la unidad, o a sí mismo.</li>
+          <li>Se hace responsable y se compromete a responder por los daños mecánicos y físicos ocasionados a la unidad rentada y a cualquier otra involucrada.</li>
+          <li>Se hace responsable y se compromete a responder por los daños causados a propiedad pública o privada, así como infracciones al reglamento de tránsito.</li>
+          <li>La póliza de seguro que el cliente posee de su vehículo particular no aplica en la unidad rentada ni cubre daños ocasionales.</li>
+        </ul>
+
+        <p class="waiver__c-h">GARANTÍA. - EL CLIENTE como garantía de que responderá por todos los daños que pudiera ocasionar por mal manejo, choque o volcadura, mediante este contrato deja en depósito y garantía el vehículo con las siguientes características ____________; mismo que se devolverá al cubrir el costo total de los daños ocasionados.</p>
+
+        <!-- La línea de "características ___" la llena el personal al recoger, no el cliente. -->
+        <p class="waiver__c-staff" aria-hidden="true"><span>Características del vehículo (las llena el personal al recoger):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+
+        <p class="waiver__c-sign-line">El cliente declara haber leído y entendido en su totalidad el contenido del presente contrato, en Puerto Peñasco, Sonora, el <span id="waiverContractDateEs" class="waiver__c-date">[fecha]</span>; por lo que lo hace constar mediante su firma al calce del presente documento.</p>
+      </div>
+      <!-- END SPANISH CONTRACT TEXT -->
     </div>
 
     <!-- Customer general data (mirrors the paper's CUSTOMER GENERAL DATA) + signing -->
