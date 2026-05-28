@@ -307,7 +307,7 @@
       var detailEl = document.getElementById('priceDetail');
       var totalEl = document.getElementById('priceTotal');
       // textContent only, no HTML injection risk
-      if (detailEl) detailEl.textContent = vehName + ' · ' + hours + ' ' + hLabel + ' × $' + rate;
+      if (detailEl) detailEl.textContent = vehName + ' · ' + hours + ' ' + hLabel + ' × $' + rate + ' USD';
       if (totalEl) totalEl.textContent = '$' + total + ' USD';
       if (empty) empty.hidden = true;
       if (ready) ready.hidden = false;
