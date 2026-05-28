@@ -47,8 +47,8 @@
     var meta = document.getElementById('metaDescription');
     if (meta) {
       meta.setAttribute('content', lang === 'es'
-        ? 'Renta de ATV y side-by-side en Puerto Peñasco (Rocky Point). Maneja las dunas y la playa en ATVs, RZRs y Can-Ams. Abierto todos los días desde las 8 AM. Reserva tu paseo.'
-        : 'ATV and side-by-side rentals in Puerto Penasco (Rocky Point). Ride the dunes and the beach on ATVs, RZRs, and Can-Ams. Open every day from 8 AM. Reserve your ride.');
+        ? 'Renta de ATV y side-by-side en Puerto Peñasco (Rocky Point). Maneja las dunas y la playa en ATVs, RZRs y Can-Ams. Abierto diario, 9 AM al atardecer. Reserva tu paseo.'
+        : 'ATV and side-by-side rentals in Puerto Penasco (Rocky Point). Ride the dunes and the beach on ATVs, RZRs, and Can-Ams. Open daily, 9 AM til sunset. Reserve your ride.');
     }
     document.documentElement.lang = lang;
     localStorage.setItem(I18N_KEY, lang);
@@ -303,6 +303,35 @@
       require('rTime');
       require('rName');
 
+      // End time: required, and must be AFTER the start time.
+      var startEl = document.getElementById('rTime');
+      var endEl = document.getElementById('rEndTime');
+      var endField = endEl ? endEl.closest('.field') : null;
+      var endErr = document.getElementById('rEndTimeErr');
+      var endVal = endEl && endEl.value ? endEl.value.trim() : '';
+      var startVal = startEl && startEl.value ? startEl.value.trim() : '';
+      if (!endVal) {
+        // missing end time
+        if (endErr) {
+          endErr.setAttribute('data-en', 'Pick an end time.');
+          endErr.setAttribute('data-es', 'Escoge una hora de fin.');
+          endErr.textContent = currentLang === 'es' ? 'Escoge una hora de fin.' : 'Pick an end time.';
+        }
+        setError(endField);
+        if (!firstInvalid) firstInvalid = endEl;
+      } else if (startVal && endVal <= startVal) {
+        // end time is not after the start time (HH:MM strings compare lexically = chronologically)
+        if (endErr) {
+          endErr.setAttribute('data-en', 'End time must be after the start time.');
+          endErr.setAttribute('data-es', 'La hora de fin debe ser posterior a la de inicio.');
+          endErr.textContent = currentLang === 'es' ? 'La hora de fin debe ser posterior a la de inicio.' : 'End time must be after the start time.';
+        }
+        setError(endField);
+        if (!firstInvalid) firstInvalid = endEl;
+      } else {
+        clearError(endField);
+      }
+
       // riders >= 1
       var ridersOk = riders && clampRiders(riders.value) >= 1 && riders.value.trim() !== '';
       if (!ridersOk) { setError(riders.closest('.field')); if (!firstInvalid) firstInvalid = riders; }
@@ -363,7 +392,9 @@
       var payload = {
         reservation: {
           date: document.getElementById('rDate').value || '',
-          time: document.getElementById('rTime').value || '',
+          time: document.getElementById('rTime').value || '', // kept for back-compat = start time
+          startTime: document.getElementById('rTime').value || '',
+          endTime: (document.getElementById('rEndTime') || {}).value || '',
           vehicle: (document.querySelector('.vehicle-pills input:checked') || {}).value || '',
           riders: riders ? clampRiders(riders.value) : null,
           name: (document.getElementById('rName').value || '').trim(),
@@ -389,9 +420,9 @@
     var body = document.getElementById('successBody');
     if (body) {
       if (currentLang === 'es') {
-        body.textContent = '¡Gracias' + (nameVal ? ' ' + nameVal : '') + '! Te confirmamos tu ' + vehName + (dateVal ? ' para el ' + dateVal : '') + ' por mensaje o correo en breve. Abrimos todos los días desde las 8 AM.';
+        body.textContent = '¡Gracias' + (nameVal ? ' ' + nameVal : '') + '! Te confirmamos tu ' + vehName + (dateVal ? ' para el ' + dateVal : '') + ' por mensaje o correo en breve. Abrimos diario, 9 AM al atardecer.';
       } else {
-        body.textContent = 'Thanks' + (nameVal ? ' ' + nameVal : '') + '! We will confirm your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' by text or email shortly. We are open every day from 8 AM.';
+        body.textContent = 'Thanks' + (nameVal ? ' ' + nameVal : '') + '! We will confirm your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' by text or email shortly. We are open daily, 9 AM til sunset.';
       }
     }
     if (card) card.classList.add('is-success');
