@@ -417,14 +417,28 @@
     var phone = document.getElementById('rPhone');
     var email = document.getElementById('rEmail');
     var vehChecked = document.querySelector('.vehicle-pills input:checked');
+    // Derive price the same way the live price summary does (rate * hours).
+    var rate = 0;
+    if (vehChecked) rate = parseInt(vehChecked.getAttribute('data-rate'), 10) || 0;
+    var startV = safeStr(document.getElementById('rTime') && document.getElementById('rTime').value);
+    var endV = safeStr(document.getElementById('rEndTime') && document.getElementById('rEndTime').value);
+    var hours = 0;
+    if (startV && endV) {
+      var s = parseInt(String(startV).split(':')[0], 10);
+      var e = parseInt(String(endV).split(':')[0], 10);
+      if (!isNaN(s) && !isNaN(e) && e > s) hours = e - s;
+    }
     return {
       date:      safeStr(document.getElementById('rDate') && document.getElementById('rDate').value),
-      startTime: safeStr(document.getElementById('rTime') && document.getElementById('rTime').value),
-      endTime:   safeStr(document.getElementById('rEndTime') && document.getElementById('rEndTime').value),
+      startTime: startV,
+      endTime:   endV,
       vehicle:   vehChecked ? safeStr(vehChecked.value) : '',
       name:      safeStr(document.getElementById('rName') && document.getElementById('rName').value, 120),
       phone:     safeStr(phone && phone.value, 40),
-      email:     safeStr(email && email.value, 254)
+      email:     safeStr(email && email.value, 254),
+      rate:      rate,
+      hours:     hours,
+      total:     rate * hours
     };
   }
 
@@ -435,6 +449,7 @@
       name: 'Nombre', phone: 'Teléfono', email: 'Correo',
       date: 'Fecha', start: 'Inicio', end: 'Fin',
       vehicle: 'Vehículo',
+      hours: 'Horas', total: 'Total a pagar (en el lugar)',
       signed: 'Contrato firmado', signedYes: 'Sí, firmado digitalmente',
       none: '(ninguno)'
     } : {
@@ -442,6 +457,7 @@
       name: 'Name', phone: 'Phone', email: 'Email',
       date: 'Date', start: 'Start', end: 'End',
       vehicle: 'Vehicle',
+      hours: 'Hours', total: 'Pay at pickup',
       signed: 'Waiver signed', signedYes: 'Yes, signed digitally',
       none: '(none)'
     };
@@ -457,6 +473,12 @@
       L.start + ': ' + (b.startTime || L.none),
       L.end + ': ' + (b.endTime || L.none)
     ];
+    // Price block — only included if we have a vehicle + hours (i.e. an actual booking, not a standalone waiver)
+    if (b && b.total && b.hours && b.rate) {
+      lines.push('');
+      lines.push(L.hours + ': ' + b.hours);
+      lines.push(L.total + ': $' + b.total + ' USD');
+    }
     lines.push('');
     lines.push(L.signed + ': ' + (waiverData ? L.signedYes : L.none));
     return lines.join('\n');
@@ -632,64 +654,70 @@
       var booking = collectBookingFields();
       var summaryEN = buildBookingSummary(booking, 'en');
       var summaryES = buildBookingSummary(booking, 'es');
-      var summary = currentLang === 'es' ? summaryES : summaryEN;
+      // Customer-facing email: uses the language they signed the waiver in (falls back to page lang).
+      var customerLang = (typeof contractLang === 'string' && contractLang) ? contractLang : currentLang;
+      var customerSummary = customerLang === 'es' ? summaryES : summaryEN;
 
       // Auto-response shown to the customer; FormSubmit sends this to whoever's email is in `email`.
-      var autoresponse = (currentLang === 'es'
-        ? ('Hola ' + (booking.name || '') + ',\n\nRecibimos tu reserva en La Palapa ATV. Aquí están los detalles:\n\n' + summaryES + '\n\nTe esperamos en Puerto Peñasco. Si necesitas cambiar algo, contesta este correo o escríbenos al WhatsApp ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
-        : ('Hi ' + (booking.name || '') + ',\n\nWe received your booking at La Palapa ATV. Here are your details:\n\n' + summaryEN + '\n\nSee you in Puerto Penasco. If anything changes, reply to this email or WhatsApp us at ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
+      // Always in the customer's WAIVER language (not the page language at submit time).
+      var autoresponse = (customerLang === 'es'
+        ? ('Hola ' + (booking.name || '') + ',\n\nRecibimos tu reserva en La Palapa ATV. Aquí están los detalles:\n\n' + customerSummary + '\n\nTe esperamos en Puerto Peñasco. Si necesitas cambiar algo, contesta este correo o escríbenos al WhatsApp ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
+        : ('Hi ' + (booking.name || '') + ',\n\nWe received your booking at La Palapa ATV. Here are your details:\n\n' + customerSummary + '\n\nSee you in Puerto Penasco. If anything changes, reply to this email or WhatsApp us at ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
       );
 
-      // FormSubmit hidden config: subject, cc to customer, replyto, autoresponse
+      // FormSubmit hidden config: subject + cc + replyto + autoresponse.
+      // Subject + owner-facing email body are ALWAYS in Spanish (owner is in MX, prefers Spanish).
       var subjEl = document.getElementById('rFsSubject');
       var ccEl = document.getElementById('rFsCc');
       var replytoEl = document.getElementById('rFsReplyto');
       var autoEl = document.getElementById('rFsAutoresponse');
-      if (subjEl) subjEl.value = 'La Palapa Booking: ' + (booking.name || 'New') + ' / ' + (booking.vehicle || 'vehicle') + ' / ' + (booking.date || todayISO());
+      if (subjEl) subjEl.value = 'Reserva La Palapa: ' + (booking.name || 'Nuevo') + ' / ' + (booking.vehicle || 'vehículo') + ' / ' + (booking.date || todayISO());
       if (ccEl) ccEl.value = booking.email; // customer copy
       if (replytoEl) replytoEl.value = booking.email || ''; // replies go to customer
       if (autoEl) autoEl.value = autoresponse;
 
       // Build FormData. FormSubmit accepts multipart/form-data with file attachment.
+      // Field names use single-token labels so FormSubmit doesn't render them with underscores
+      // in the email column headers (it converts multi-word names like "Waiver signed" to "Waiver_signed").
+      // The owner email is in Spanish. The customer copy uses the same fields (they see what they signed).
+      var totalDisplay = (booking.total > 0) ? ('$' + booking.total + ' USD') : '';
       var fd = new FormData();
-      // Use a label that reads cleanly in the email table:
-      fd.append('Name', booking.name);
-      fd.append('Phone', booking.phone);
-      fd.append('Email', booking.email);
-      fd.append('Vehicle', booking.vehicle);
-      fd.append('Date', booking.date);
-      fd.append('Start time', booking.startTime);
-      fd.append('End time', booking.endTime);
-      fd.append('Booking summary', summaryEN);
-      // Waiver detail
+      fd.append('Nombre', booking.name);
+      fd.append('Telefono', booking.phone);
+      fd.append('Correo', booking.email);
+      fd.append('Vehiculo', booking.vehicle);
+      fd.append('Fecha', booking.date);
+      fd.append('Inicio', booking.startTime);
+      fd.append('Fin', booking.endTime);
+      if (booking.hours) fd.append('Horas', String(booking.hours));
+      if (totalDisplay) fd.append('Total', totalDisplay + ' (pago en el lugar)');
+      fd.append('Resumen', summaryES); // owner gets Spanish summary in body
+      // Waiver detail (single-word labels, Spanish)
       if (waiverData) {
-        fd.append('Waiver signed', 'YES');
-        fd.append('Waiver signer name', safeStr(waiverData.signerName, 120));
-        fd.append('Waiver signature type', safeStr(waiverData.signatureType));
-        fd.append('Waiver agreement', waiverData.agreement ? 'true' : 'false');
-        fd.append('Waiver signed at (ISO)', safeStr(waiverData.signedAtISO));
-        fd.append('Waiver signed place', safeStr(waiverData.signedPlace));
+        fd.append('Firmado', 'SI');
+        fd.append('Firma-tipo', safeStr(waiverData.signatureType));
+        fd.append('Firma-fecha', safeStr(waiverData.signedAtISO));
+        fd.append('Firma-lugar', safeStr(waiverData.signedPlace));
+        fd.append('Firma-idioma', customerLang);
         var c = waiverData.customer || {};
-        fd.append('Customer telephone', safeStr(c.telephone, 40));
-        fd.append('Customer address', safeStr(c.address, 200));
-        fd.append('Customer hotel', safeStr(c.hotel, 120));
-        fd.append('Customer room', safeStr(c.roomNo, 20));
-        fd.append('Customer check-in', safeStr(c.checkin));
-        fd.append('Customer check-out', safeStr(c.checkout));
+        fd.append('Direccion', safeStr(c.address, 200));
+        fd.append('Hotel', safeStr(c.hotel, 120));
+        fd.append('Habitacion', safeStr(c.roomNo, 20));
+        fd.append('Entrada', safeStr(c.checkin));
+        fd.append('Salida', safeStr(c.checkout));
         if (waiverData.signatureType === 'drawn') {
           var blob = dataURLToBlob(waiverData.signature);
           if (blob) {
-            var fname = 'signature-' + (booking.name || 'customer').replace(/[^a-z0-9_-]+/gi, '_') + '-' + (booking.date || todayISO()) + '.png';
-            fd.append('signature_image', blob, fname);
+            var fname = 'firma-' + (booking.name || 'cliente').replace(/[^a-z0-9_-]+/gi, '_') + '-' + (booking.date || todayISO()) + '.png';
+            fd.append('Firma-imagen', blob, fname);
           } else {
-            // dataURL malformed for some reason; still include the raw value so nothing is lost
-            fd.append('signature_data_url', safeStr(waiverData.signature, 100000));
+            fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
           }
         } else {
-          fd.append('Typed signature', safeStr(waiverData.signature, 120));
+          fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
         }
       } else {
-        fd.append('Waiver signed', 'NO');
+        fd.append('Firmado', 'NO');
       }
       // FormSubmit config (these are also present as hidden fields, FormData picks them up via the form)
       // We set them on the form already, but we append explicitly so the AJAX path doesn't lose them.
@@ -1119,40 +1147,45 @@
     var replytoEl = document.getElementById('wFsReplyto');
     var autoEl = document.getElementById('wFsAutoresponse');
     var c = (waiverData && waiverData.customer) || {};
-    if (subjEl) subjEl.value = 'La Palapa Waiver: ' + (waiverData.signerName || 'walk-in');
+    // Owner email subject in Spanish.
+    if (subjEl) subjEl.value = 'Contrato firmado La Palapa: ' + (waiverData.signerName || 'walk-in');
     if (ccEl) ccEl.value = emailVal;
     if (replytoEl) replytoEl.value = emailVal;
-    var autoLines = (currentLang === 'es'
+    // Customer auto-response uses the language they signed the waiver in (not the page lang).
+    var customerLang = (typeof contractLang === 'string' && contractLang) ? contractLang : currentLang;
+    var autoLines = (customerLang === 'es'
       ? ['Hola ' + (waiverData.signerName || '') + ',', '', 'Adjunto está tu copia del contrato firmado de La Palapa ATV. Diviértete en la arena.', '', 'La Palapa ATV']
       : ['Hi ' + (waiverData.signerName || '') + ',', '', 'Attached is your copy of the signed La Palapa ATV waiver. Have fun on the sand.', '', 'La Palapa ATV']
     );
     if (autoEl) autoEl.value = autoLines.join('\n');
 
+    // Field labels in Spanish, single-token so FormSubmit doesn't underscore them.
     var fd = new FormData();
-    fd.append('Signer name', waiverData.signerName);
-    fd.append('Telephone', safeStr(c.telephone, 40));
-    fd.append('Email', emailVal);
-    fd.append('Address', safeStr(c.address, 200));
+    fd.append('Nombre', waiverData.signerName);
+    fd.append('Telefono', safeStr(c.telephone, 40));
+    fd.append('Correo', emailVal);
+    fd.append('Direccion', safeStr(c.address, 200));
     fd.append('Hotel', safeStr(c.hotel, 120));
-    fd.append('Room', safeStr(c.roomNo, 20));
-    fd.append('Check-in', safeStr(c.checkin));
-    fd.append('Check-out', safeStr(c.checkout));
-    fd.append('Waiver signed at (ISO)', safeStr(waiverData.signedAtISO));
-    fd.append('Waiver signed place', safeStr(waiverData.signedPlace));
-    fd.append('Signature type', safeStr(waiverData.signatureType));
-    fd.append('Agreement', waiverData.agreement ? 'true' : 'false');
+    fd.append('Habitacion', safeStr(c.roomNo, 20));
+    fd.append('Entrada', safeStr(c.checkin));
+    fd.append('Salida', safeStr(c.checkout));
+    fd.append('Firma-fecha', safeStr(waiverData.signedAtISO));
+    fd.append('Firma-lugar', safeStr(waiverData.signedPlace));
+    fd.append('Firma-tipo', safeStr(waiverData.signatureType));
+    fd.append('Firma-idioma', customerLang);
+    fd.append('Acepto', waiverData.agreement ? 'SI' : 'NO');
     if (waiverData.signatureType === 'drawn') {
       var blob = dataURLToBlob(waiverData.signature);
       if (blob) {
-        var fname = 'signature-' + (waiverData.signerName || 'customer').replace(/[^a-z0-9_-]+/gi, '_') + '.png';
-        fd.append('signature_image', blob, fname);
+        var fname = 'firma-' + (waiverData.signerName || 'cliente').replace(/[^a-z0-9_-]+/gi, '_') + '.png';
+        fd.append('Firma-imagen', blob, fname);
       } else {
-        fd.append('signature_data_url', safeStr(waiverData.signature, 100000));
+        fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
       }
     } else {
-      fd.append('Typed signature', safeStr(waiverData.signature, 120));
+      fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
     }
-    fd.set('_subject', subjEl ? subjEl.value : 'La Palapa Waiver');
+    fd.set('_subject', subjEl ? subjEl.value : 'Contrato firmado La Palapa');
     fd.set('_template', 'table');
     fd.set('_captcha', 'false');
     if (emailVal) {
