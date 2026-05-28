@@ -284,6 +284,61 @@
   if (minus) minus.addEventListener('click', function () { riders.value = clampRiders(riders.value) - 1; clearError(riders.closest('.field')); });
   if (riders) riders.addEventListener('input', function () { riders.value = riders.value.replace(/[^0-9]/g, ''); });
 
+  /* =====================================================
+     Live price summary: vehicle rate * hours (updates as user picks)
+     ===================================================== */
+  function updatePriceSummary() {
+    var summary = document.getElementById('priceSummary');
+    if (!summary) return;
+    var empty = document.getElementById('priceEmpty');
+    var ready = document.getElementById('priceReady');
+    var vehInput = document.querySelector('.vehicle-pills input:checked');
+    var startEl = document.getElementById('rTime');
+    var endEl = document.getElementById('rEndTime');
+    var startVal = startEl ? startEl.value : '';
+    var endVal = endEl ? endEl.value : '';
+    var rate = 0, vehName = '';
+    if (vehInput) {
+      rate = parseInt(vehInput.getAttribute('data-rate'), 10) || 0;
+      vehName = vehInput.value || '';
+    }
+    var hours = 0;
+    if (startVal && endVal) {
+      var s = parseInt(String(startVal).split(':')[0], 10);
+      var e = parseInt(String(endVal).split(':')[0], 10);
+      if (!isNaN(s) && !isNaN(e) && e > s) hours = e - s;
+    }
+    if (rate > 0 && hours > 0) {
+      var total = rate * hours;
+      var hLabel = currentLang === 'es'
+        ? (hours === 1 ? 'hora' : 'horas')
+        : (hours === 1 ? 'hr' : 'hrs');
+      var detailEl = document.getElementById('priceDetail');
+      var totalEl = document.getElementById('priceTotal');
+      // textContent only, no HTML injection risk
+      if (detailEl) detailEl.textContent = vehName + ' · ' + hours + ' ' + hLabel + ' × $' + rate;
+      if (totalEl) totalEl.textContent = '$' + total + ' USD';
+      if (empty) empty.hidden = true;
+      if (ready) ready.hidden = false;
+    } else {
+      if (empty) empty.hidden = false;
+      if (ready) ready.hidden = true;
+    }
+  }
+  $$('.vehicle-pills input').forEach(function (r) {
+    r.addEventListener('change', updatePriceSummary);
+  });
+  ['rTime', 'rEndTime'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', updatePriceSummary);
+  });
+  // Re-run after language toggles so 'hr/hrs' switches to 'hora/horas' and back
+  $$('.lang-toggle button').forEach(function (b) {
+    b.addEventListener('click', function () { setTimeout(updatePriceSummary, 0); });
+  });
+  // Initial paint (covers ?vehicle= deep-link preselect from the fleet cards)
+  updatePriceSummary();
+
   function setError(field) { if (field) field.classList.add('has-error'); }
   function clearError(field) { if (field) field.classList.remove('has-error'); }
 

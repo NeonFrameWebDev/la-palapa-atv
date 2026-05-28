@@ -203,23 +203,44 @@
               <label id="vehicleLabel"><span data-en="Vehicle type" data-es="Tipo de vehículo">Vehicle type</span> <span class="req" aria-hidden="true">*</span></label>
               <div class="vehicle-pills" role="radiogroup" aria-labelledby="vehicleLabel" aria-describedby="rVehErr">
                 <label class="pill">
-                  <input type="radio" name="vehicle" value="ATV" data-key="atv" required aria-required="true">
+                  <input type="radio" name="vehicle" value="ATV" data-key="atv" data-rate="30" required aria-required="true">
                   <span class="name">ATV</span><span class="rate">$30 <span data-en="/ hr" data-es="/ hr">/ hr</span></span>
                 </label>
                 <label class="pill">
-                  <input type="radio" name="vehicle" value="2-Seat RZR" data-key="rzr2">
+                  <input type="radio" name="vehicle" value="2-Seat RZR" data-key="rzr2" data-rate="120">
                   <span class="name" data-en="2-Seat RZR" data-es="RZR de 2">2-Seat RZR</span><span class="rate">$120 <span>/ hr</span></span>
                 </label>
                 <label class="pill">
-                  <input type="radio" name="vehicle" value="4-Seat RZR" data-key="rzr4">
+                  <input type="radio" name="vehicle" value="4-Seat RZR" data-key="rzr4" data-rate="150">
                   <span class="name" data-en="4-Seat RZR" data-es="RZR de 4">4-Seat RZR</span><span class="rate">$150 <span>/ hr</span></span>
                 </label>
                 <label class="pill">
-                  <input type="radio" name="vehicle" value="Can-Am" data-key="canam">
+                  <input type="radio" name="vehicle" value="Can-Am" data-key="canam" data-rate="170">
                   <span class="name">Can-Am</span><span class="rate">$170 <span>/ hr</span></span>
                 </label>
               </div>
               <span class="field__error" id="rVehErr" data-en="Choose a vehicle." data-es="Escoge un vehículo.">Choose a vehicle.</span>
+            </div>
+
+            <!-- Live price summary. Updates as the customer picks vehicle + start + end time.
+                 Always visible: empty-state coaches the user, ready-state shows the math. -->
+            <div class="field field--full price-summary" id="priceSummary" role="status" aria-live="polite">
+              <div class="price-summary__empty" id="priceEmpty"
+                   data-en="Pick a vehicle, start time, and end time to see your total."
+                   data-es="Escoge un vehículo, hora de inicio y hora de fin para ver tu total.">Pick a vehicle, start time, and end time to see your total.</div>
+              <div class="price-summary__ready" id="priceReady" hidden>
+                <div class="price-summary__row">
+                  <span class="price-summary__label" data-en="Your ride" data-es="Tu paseo">Your ride</span>
+                  <span class="price-summary__detail" id="priceDetail">—</span>
+                </div>
+                <div class="price-summary__row price-summary__row--total">
+                  <span class="price-summary__total-label" data-en="Pay at pickup" data-es="Paga al recoger">Pay at pickup</span>
+                  <span class="price-summary__total-amt" id="priceTotal">—</span>
+                </div>
+                <p class="price-summary__note"
+                   data-en="Total in USD. Paid in cash or card when you pick up the machine. No prepayment now."
+                   data-es="Total en USD. Pagas en efectivo o con tarjeta al recoger la máquina. Sin pago anticipado.">Total in USD. Paid in cash or card when you pick up the machine. No prepayment now.</p>
+              </div>
             </div>
 
             <div class="field">

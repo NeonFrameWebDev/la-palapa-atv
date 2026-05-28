@@ -470,6 +470,47 @@ strong { font-weight: 600; }
 .field.has-error input, .field.has-error select, .field.has-error textarea { border-color: var(--red); }
 .field.has-error .field__error { display: block; }
 
+/* Live price summary card (between Vehicle pills and Riders) */
+.price-summary {
+  background: linear-gradient(135deg, #fff8ec 0%, #fdeed0 100%);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  color: var(--near-black);
+}
+.price-summary__empty {
+  font-size: 0.92rem; color: #6b6450; font-style: italic;
+  text-align: center;
+}
+.price-summary__row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem;
+  padding: 0.25rem 0;
+}
+.price-summary__row--total {
+  margin-top: 0.4rem; padding-top: 0.65rem;
+  border-top: 1.5px dashed var(--sand);
+}
+.price-summary__label {
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; color: #3a382f;
+  text-transform: uppercase;
+}
+.price-summary__detail {
+  font-family: var(--font-body); font-size: 1rem; font-weight: 500; color: var(--near-black);
+  text-align: right;
+}
+.price-summary__total-label {
+  font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--near-black);
+}
+.price-summary__total-amt {
+  font-family: var(--font-display); font-size: clamp(1.7rem, 5vw, 2.3rem);
+  color: var(--red); letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+}
+.price-summary__note {
+  margin: 0.6rem 0 0; font-size: 0.78rem; color: #6b6450; line-height: 1.5;
+}
+
 /* vehicle pill group */
 .vehicle-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
 .vehicle-pills .pill {
