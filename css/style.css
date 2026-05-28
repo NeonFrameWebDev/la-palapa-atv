@@ -155,8 +155,21 @@ strong { font-weight: 600; }
 .btn--red { background: var(--red); color: var(--cream); border-color: var(--red); }
 .btn--red:hover { background: var(--red-dark); border-color: var(--red-dark); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204,28,28,0.35); }
 
-.btn--ghost { background: transparent; color: var(--cream); border-color: var(--gold); }
-.btn--ghost:hover { background: var(--gold); color: var(--ink); transform: translateY(-2px); }
+.btn--ghost {
+  background: rgba(212,137,42,0.08);
+  color: var(--cream);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(212,137,42,0.15) inset, 0 6px 20px rgba(0,0,0,0.3);
+}
+.btn--ghost:hover {
+  background: var(--gold);
+  color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(212,137,42,0.4);
+}
+/* On light panels, ghost button needs darker text + visible border */
+.section--light .btn--ghost { color: var(--near-black); background: rgba(212,137,42,0.12); }
+.section--light .btn--ghost:hover { color: var(--ink); background: var(--gold); }
 
 .btn--dark { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 .btn--dark:hover { background: var(--red); border-color: var(--red); }
@@ -199,9 +212,10 @@ strong { font-weight: 600; }
    ========================================================================== */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.78) 0%, rgba(10,10,10,0.55) 70%, rgba(10,10,10,0.0) 100%);
   transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
 }
-.nav.is-scrolled { background: rgba(10,10,10,0.92); box-shadow: 0 1px 0 rgba(200,169,106,0.18), 0 8px 30px rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
+.nav.is-scrolled { background: rgba(10,10,10,0.95); box-shadow: 0 1px 0 rgba(200,169,106,0.22), 0 8px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .nav__inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: var(--nav-h); }
 .nav__brand { display: flex; flex-direction: column; gap: 3px; }
 .nav__logo { height: 34px; width: auto; }
@@ -455,11 +469,37 @@ strong { font-weight: 600; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .form-reassure { margin-top: 0.85rem; text-align: center; font-size: 0.85rem; color: #6b6759; }
+/* Honeypot field: hidden from real users, visible to bots */
+.hp-field {
+  position: absolute !important;
+  left: -10000px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
 .form-error-notice {
-  display: none; margin-top: 1rem; padding: 0.85rem 1rem; border-radius: var(--radius);
-  background: #fdecea; border: 1px solid #f3b9b3; color: #8a1c14; font-size: 0.9rem;
+  display: none; margin-top: 1rem; padding: 1rem 1.1rem; border-radius: var(--radius);
+  background: #fdecea; border: 1px solid #f3b9b3; color: #8a1c14; font-size: 0.92rem;
 }
 .form-error-notice.is-shown { display: block; }
+.form-error__msg { margin: 0 0 0.75rem; font-weight: 500; line-height: 1.5; }
+.form-error__buttons { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.75rem; }
+.form-error__btn { flex: 1 1 140px; font-size: 0.82rem; padding: 0.7rem 1rem; }
+.form-error__btn.btn--ghost { color: #8a1c14; border-color: #8a1c14; background: transparent; }
+.form-error__btn.btn--ghost:hover { background: #8a1c14; color: #fff; }
+.form-error__phone { margin: 0; font-size: 0.86rem; color: #6b1810; }
+
+/* Success state extras: WhatsApp button + tagline */
+.reserve__success .sx-extra {
+  margin: 0.8rem 0 0.6rem; font-size: 0.9rem; color: #6b6759; font-weight: 500;
+}
+.reserve__success .sx-whatsapp {
+  margin-bottom: 1.4rem;
+  background: #25D366; border-color: #25D366; color: #fff;
+}
+.reserve__success .sx-whatsapp:hover { background: #1ebe5b; border-color: #1ebe5b; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(37,211,102,0.35); }
 
 /* success state */
 .reserve__success { display: none; padding: clamp(1.5rem, 5vw, 2.5rem); text-align: center; }

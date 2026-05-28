@@ -144,12 +144,16 @@
       <div class="reserve__body">
         <!--
           INSTANT BOOKING FORM.
-          SEND DESTINATION IS TBD (owner email and/or WhatsApp not yet provided).
-          The submit handler in js/main.js is stubbed to the confirmed-booking success state and does NOT post anywhere.
-          When the owner confirms the destination, set a real action/endpoint here and wire the fetch in main.js.
-          action="[OWNER EMAIL / FORM ENDPOINT - TBD]"
+          Primary submit: POST to FormSubmit.co (AJAX endpoint), recipient = becca@neonframewebdesign.com.
+          Becca activates the endpoint via the activation email on the first real submission, then it stays live forever.
+          Becca forwards bookings to owner until owner provides a direct email; then swap the recipient in main.js.
+          Fallbacks (so a failed network NEVER loses a booking): on submit failure we show WhatsApp + mailto buttons
+          with the full booking summary prefilled. Honeypot + AbortController timeout in JS for spam + hang protection.
         -->
-        <form id="reserveForm" novalidate>
+        <form id="reserveForm" novalidate
+              action="https://formsubmit.co/becca@neonframewebdesign.com"
+              method="POST" enctype="multipart/form-data"
+              autocomplete="on">
           <div class="form-grid">
             <div class="field">
               <label for="rDate"><span data-en="Date" data-es="Fecha">Date</span> <span class="req" aria-hidden="true">*</span></label>
@@ -275,9 +279,28 @@
             </div>
           </div>
 
+          <!-- Honeypot for spam bots: real users never see this, bots fill it and get silently dropped. -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="rWebsite">Website (leave blank)</label>
+            <input type="text" id="rWebsite" name="_honey" tabindex="-1" autocomplete="off">
+          </div>
+          <!-- FormSubmit config (visible to FormSubmit, customer never sees these fields render in the UI). -->
+          <input type="hidden" name="_subject" id="rFsSubject" value="New La Palapa booking">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_cc" id="rFsCc" value="">
+          <input type="hidden" name="_replyto" id="rFsReplyto" value="">
+          <input type="hidden" name="_autoresponse" id="rFsAutoresponse" value="">
+          <input type="hidden" name="_next" value="https://neonframewebdev.github.io/la-palapa-atv/reserve.html?booked=1">
+
           <div class="form-error-notice" id="formError" role="alert">
-            <!-- phone fallback so a failed submit never loses the lead -->
-            <span data-en="Something went wrong sending that. Call or WhatsApp us at 638-112-4485 and we'll get you on the calendar." data-es="Algo salió mal al enviar. Llámanos o mándanos WhatsApp al 638-112-4485 y te ponemos en el calendario.">Something went wrong sending that. Call or WhatsApp us at 638-112-4485 and we'll get you on the calendar.</span>
+            <p class="form-error__msg" data-en="We could not send that just now. Don't worry, your booking is not lost. Send it through one of these instead and we'll confirm right away:" data-es="No pudimos enviar eso ahora. No te preocupes, tu reserva no se perdió. Mándala por una de estas opciones y te confirmamos enseguida:">We could not send that just now. Don't worry, your booking is not lost. Send it through one of these instead and we'll confirm right away:</p>
+            <div class="form-error__buttons">
+              <a class="btn btn--red form-error__btn" id="formErrorWhatsapp" href="#" target="_blank" rel="noopener" data-en="Send on WhatsApp" data-es="Enviar por WhatsApp">Send on WhatsApp</a>
+              <a class="btn btn--dark form-error__btn" id="formErrorMailto" href="#" data-en="Send by email" data-es="Enviar por correo">Send by email</a>
+              <button type="button" class="btn btn--ghost form-error__btn" id="formErrorRetry" data-en="Try again" data-es="Reintentar">Try again</button>
+            </div>
+            <p class="form-error__phone" data-en="Or call us at 638-112-4485 and we'll get you on the calendar." data-es="O llámanos al 638-112-4485 y te ponemos en el calendario.">Or call us at 638-112-4485 and we'll get you on the calendar.</p>
           </div>
 
           <div class="form-submit">
@@ -298,7 +321,13 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <p class="sx-title" data-en="You're booked!" data-es="¡Reservado!">You're booked!</p>
-        <p class="sx-body" id="successBody" data-en="You're booked! Check your phone for your booking details. See you on the sand." data-es="¡Listo! Revisa tu teléfono para los detalles de tu reserva. Nos vemos en la arena.">You're booked! Check your phone for your booking details. See you on the sand.</p>
+        <p class="sx-body" id="successBody" data-en="You're booked! Check your email for your booking confirmation and a copy of the signed waiver. See you on the sand." data-es="¡Listo! Revisa tu correo para la confirmación y una copia del contrato firmado. Nos vemos en la arena.">You're booked! Check your email for your booking confirmation and a copy of the signed waiver. See you on the sand.</p>
+
+        <!-- WhatsApp confirmation channel: extra touch so the owner gets a heads-up too. Always shown on success. -->
+        <p class="sx-extra" data-en="Want to message the team too?" data-es="¿Quieres avisarle al equipo también?">Want to message the team too?</p>
+        <a class="btn btn--red sx-whatsapp" id="successWhatsapp" href="#" target="_blank" rel="noopener"
+           data-en="Send a quick WhatsApp" data-es="Enviar un WhatsApp rápido">Send a quick WhatsApp</a>
+
         <button type="button" class="sx-reset" id="resetForm" data-en="Book another" data-es="Reservar otro">Book another</button>
       </div>
     </div>

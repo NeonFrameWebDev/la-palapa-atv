@@ -14,15 +14,27 @@
   if (hasGSAP && hasST) { gsap.registerPlugin(ScrollTrigger); }
 
   /* =====================================================
+     Safe storage helpers (Safari private mode etc. can throw)
+     ===================================================== */
+  function safeStorageGet(store, key) {
+    try { return window[store] ? window[store].getItem(key) : null; } catch (e) { return null; }
+  }
+  function safeStorageSet(store, key, val) {
+    try { if (window[store]) window[store].setItem(key, val); } catch (e) { /* no-op */ }
+  }
+
+  /* =====================================================
      i18n: EN primary, ES toggle (data-en / data-es)
      Auto-detect once, then respect localStorage + ?lang=
      ===================================================== */
   var I18N_KEY = 'lp_lang';
   function getInitialLang() {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('lang') === 'es') return 'es';
-    if (params.get('lang') === 'en') return 'en';
-    var stored = localStorage.getItem(I18N_KEY);
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('lang') === 'es') return 'es';
+      if (params.get('lang') === 'en') return 'en';
+    } catch (e) { /* URLSearchParams not available */ }
+    var stored = safeStorageGet('localStorage', I18N_KEY);
     if (stored === 'es' || stored === 'en') return stored;
     var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     return nav.indexOf('es') === 0 ? 'es' : 'en';
@@ -30,13 +42,29 @@
 
   function applyLang(lang) {
     var attr = lang === 'es' ? 'data-es' : 'data-en';
-    // text content swaps
+    // text content swaps — preserve child elements (icons, arrow spans, etc.) by
+    // updating only the first text node when the element has children.
+    function setLangContent(el, val) {
+      if (el.tagName === 'TITLE') { el.textContent = val; return; }
+      var hasChildEls = el.children && el.children.length > 0;
+      if (!hasChildEls) { el.textContent = val; return; }
+      // Find first text-node child; if missing, insert one ahead of the first element child.
+      var firstText = null;
+      for (var i = 0; i < el.childNodes.length; i++) {
+        if (el.childNodes[i].nodeType === 3) { firstText = el.childNodes[i]; break; }
+      }
+      if (firstText) {
+        // Keep a trailing space if there's a sibling element after (so text and icon don't collide).
+        var needsTrailing = el.children.length > 0 && val && val.charAt(val.length - 1) !== ' ';
+        firstText.nodeValue = needsTrailing ? (val + ' ') : val;
+      } else {
+        el.insertBefore(document.createTextNode(val + ' '), el.firstChild);
+      }
+    }
     $$('[data-en]').forEach(function (el) {
       var val = el.getAttribute(attr);
       if (val === null) return;
-      // <title> and meta handled below; here swap visible text nodes only
-      if (el.tagName === 'TITLE') { el.textContent = val; return; }
-      el.textContent = val;
+      setLangContent(el, val);
     });
     // placeholders
     $$('[data-placeholder-en]').forEach(function (el) {
@@ -51,7 +79,7 @@
         : 'ATV and side-by-side rentals in Puerto Penasco (Rocky Point). Ride the dunes and the beach on ATVs, RZRs, and Can-Ams. Open daily, 9 AM til sunset. Reserve your ride.');
     }
     document.documentElement.lang = lang;
-    localStorage.setItem(I18N_KEY, lang);
+    safeStorageSet('localStorage', I18N_KEY, lang);
     // toggle button states (both nav + menu copies)
     $$('.lang-toggle button').forEach(function (b) {
       var active = b.getAttribute('data-lang') === lang;
@@ -86,13 +114,13 @@
   }
 
   if (loader) {
-    var seen = sessionStorage.getItem('lp_seen') === '1';
+    var seen = safeStorageGet('sessionStorage', 'lp_seen') === '1';
     if (seen || reduceMotion) {
       // instant logo + fast fade for reduced motion / repeat visit
       loader.classList.add('is-ready');
       setTimeout(finishLoader, reduceMotion ? 120 : 350);
     } else {
-      sessionStorage.setItem('lp_seen', '1');
+      safeStorageSet('sessionStorage', 'lp_seen', '1');
       document.body.classList.add('is-locked');
       setTimeout(function () { loader.classList.add('is-ready'); }, 60);
       var bar = loader.querySelector('.loader__bar');
@@ -292,71 +320,243 @@
     }
   }
 
+  /* =====================================================
+     Submission constants. Owner's primary line is the WhatsApp + tel fallback channel.
+     When the owner provides a dedicated email, swap BOOKING_RECIPIENT_EMAIL below.
+     ===================================================== */
+  var BOOKING_RECIPIENT_EMAIL = 'becca@neonframewebdesign.com';
+  var FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/' + BOOKING_RECIPIENT_EMAIL;
+  var OWNER_PHONE_DIGITS = '526381124485'; // E.164 without +, for wa.me + tel:
+  var OWNER_PHONE_DISPLAY = '638-112-4485';
+  var SUBMIT_TIMEOUT_MS = 18000;
+  var SUBMIT_MAX_RETRIES = 1; // one extra automatic retry for transient network failures
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  var isSubmitting = false; // hard guard against double-submits
+
+  /* Tiny helpers */
+  function safeStr(v, max) {
+    if (v == null) return '';
+    var s = String(v).replace(/[ -]/g, '').trim();
+    if (max && s.length > max) s = s.slice(0, max);
+    return s;
+  }
+  function digitsOnly(v) { return safeStr(v).replace(/\D+/g, ''); }
+  function looksLikePhone(v) { return digitsOnly(v).length >= 7; }
+  function looksLikeEmail(v) { return EMAIL_RE.test(safeStr(v)); }
+  function todayISO() {
+    var t = new Date();
+    return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+  }
+  function dataURLToBlob(dataURL) {
+    try {
+      var parts = String(dataURL || '').split(',');
+      if (parts.length < 2) return null;
+      var mimeMatch = parts[0].match(/data:([^;]+)/);
+      var mime = mimeMatch ? mimeMatch[1] : 'image/png';
+      var bin = atob(parts[1]);
+      var len = bin.length;
+      var arr = new Uint8Array(len);
+      for (var i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+      return new Blob([arr], { type: mime });
+    } catch (err) { return null; }
+  }
+  function escapeHTML(s) {
+    return safeStr(s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  /* ---- collect normalized booking fields (single source of truth) ---- */
+  function collectBookingFields() {
+    var phone = document.getElementById('rPhone');
+    var email = document.getElementById('rEmail');
+    var vehChecked = document.querySelector('.vehicle-pills input:checked');
+    return {
+      date:      safeStr(document.getElementById('rDate') && document.getElementById('rDate').value),
+      startTime: safeStr(document.getElementById('rTime') && document.getElementById('rTime').value),
+      endTime:   safeStr(document.getElementById('rEndTime') && document.getElementById('rEndTime').value),
+      vehicle:   vehChecked ? safeStr(vehChecked.value) : '',
+      riders:    riders ? clampRiders(riders.value) : 1,
+      name:      safeStr(document.getElementById('rName') && document.getElementById('rName').value, 120),
+      phone:     safeStr(phone && phone.value, 40),
+      email:     safeStr(email && email.value, 254),
+      notes:     safeStr(document.getElementById('rNotes') && document.getElementById('rNotes').value, 2000)
+    };
+  }
+
+  /* ---- human-readable booking summary (for WhatsApp + mailto + auto-response) ---- */
+  function buildBookingSummary(b, lang) {
+    var L = lang === 'es' ? {
+      title: 'Reserva La Palapa ATV',
+      name: 'Nombre', phone: 'Teléfono', email: 'Correo',
+      date: 'Fecha', start: 'Inicio', end: 'Fin',
+      vehicle: 'Vehículo', riders: 'Pasajeros', notes: 'Notas',
+      signed: 'Contrato firmado', signedYes: 'Sí, firmado digitalmente',
+      none: '(ninguno)'
+    } : {
+      title: 'La Palapa ATV Booking',
+      name: 'Name', phone: 'Phone', email: 'Email',
+      date: 'Date', start: 'Start', end: 'End',
+      vehicle: 'Vehicle', riders: 'Riders', notes: 'Notes',
+      signed: 'Waiver signed', signedYes: 'Yes, signed digitally',
+      none: '(none)'
+    };
+    var lines = [
+      L.title,
+      '',
+      L.name + ': ' + (b.name || L.none),
+      L.phone + ': ' + (b.phone || L.none),
+      L.email + ': ' + (b.email || L.none),
+      '',
+      L.vehicle + ': ' + (b.vehicle || L.none),
+      L.riders + ': ' + b.riders,
+      L.date + ': ' + (b.date || L.none),
+      L.start + ': ' + (b.startTime || L.none),
+      L.end + ': ' + (b.endTime || L.none)
+    ];
+    if (b.notes) { lines.push(''); lines.push(L.notes + ': ' + b.notes); }
+    lines.push('');
+    lines.push(L.signed + ': ' + (waiverData ? L.signedYes : L.none));
+    return lines.join('\n');
+  }
+  function buildWhatsappURL(summary) {
+    return 'https://wa.me/' + OWNER_PHONE_DIGITS + '?text=' + encodeURIComponent(summary);
+  }
+  function buildMailtoURL(summary, b) {
+    var subj = 'La Palapa Booking, ' + (b.name || 'New booking') + ' ' + b.date;
+    return 'mailto:' + BOOKING_RECIPIENT_EMAIL +
+      '?subject=' + encodeURIComponent(subj) +
+      '&body=' + encodeURIComponent(summary);
+  }
+
+  /* ---- POST to FormSubmit.co with timeout + automatic retry on transient errors ---- */
+  function postBooking(fd, attempt) {
+    attempt = attempt || 0;
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) try { ctrl.abort(); } catch (e) {} }, SUBMIT_TIMEOUT_MS);
+    return fetch(FORMSUBMIT_ENDPOINT, {
+      method: 'POST',
+      body: fd,
+      headers: { 'Accept': 'application/json' },
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (res) {
+      clearTimeout(timer);
+      // FormSubmit returns 200/302 on success, 4xx on validation, 5xx on their issues.
+      if (!res.ok) {
+        // 429/5xx are worth retrying once; 4xx is permanent.
+        if ((res.status === 429 || res.status >= 500) && attempt < SUBMIT_MAX_RETRIES) {
+          return new Promise(function (resolve) { setTimeout(resolve, 600); })
+            .then(function () { return postBooking(fd, attempt + 1); });
+        }
+        throw new Error('formsubmit_status_' + res.status);
+      }
+      return res.json().catch(function () { return { success: 'true' }; });
+    }, function (err) {
+      clearTimeout(timer);
+      var transient = err && (err.name === 'AbortError' || err.name === 'TypeError'); // network / aborted
+      if (transient && attempt < SUBMIT_MAX_RETRIES) {
+        return new Promise(function (resolve) { setTimeout(resolve, 600); })
+          .then(function () { return postBooking(fd, attempt + 1); });
+      }
+      throw err;
+    });
+  }
+
+  /* ---- the actual submit handler ---- */
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (isSubmitting) return;
+
+      // honeypot: if filled, silently "succeed" without sending (bot trap)
+      var honey = document.getElementById('rWebsite');
+      if (honey && honey.value) { showSuccess(true); return; }
+
       var firstInvalid = null;
 
-      function require(id) {
+      function require(id, opts) {
         var el = document.getElementById(id);
         var field = el ? el.closest('.field') : null;
-        var ok = el && el.value && el.value.trim() !== '';
+        var v = el ? safeStr(el.value) : '';
+        var ok = v !== '';
+        if (ok && opts && opts.minLen && v.length < opts.minLen) ok = false;
         if (!ok) { setError(field); if (!firstInvalid) firstInvalid = el; }
         else clearError(field);
         return ok;
       }
 
-      require('rDate');
-      require('rTime');
-      require('rName');
+      // Date required + not in the past (HTML5 min attr is a hint; double-check on submit)
+      var dateEl = document.getElementById('rDate');
+      var dateField = dateEl ? dateEl.closest('.field') : null;
+      var dateErr = document.getElementById('rDateErr');
+      var dateVal = safeStr(dateEl && dateEl.value);
+      if (!dateVal) {
+        if (dateErr) { dateErr.textContent = currentLang === 'es' ? 'Escoge una fecha.' : 'Pick a date.'; }
+        setError(dateField);
+        if (!firstInvalid) firstInvalid = dateEl;
+      } else if (dateVal < todayISO()) {
+        if (dateErr) { dateErr.textContent = currentLang === 'es' ? 'Escoge una fecha de hoy o más adelante.' : 'Pick today or a future date.'; }
+        setError(dateField);
+        if (!firstInvalid) firstInvalid = dateEl;
+      } else { clearError(dateField); }
 
-      // End time: required, and must be AFTER the start time.
+      require('rTime');
+      var nameEl = document.getElementById('rName');
+      var nameOk = require('rName', { minLen: 2 });
+      // Reject all-whitespace / single-char names
+      if (nameOk && safeStr(nameEl.value).length < 2) {
+        setError(nameEl.closest('.field'));
+        if (!firstInvalid) firstInvalid = nameEl;
+      }
+
+      // End time: required, AND must be AFTER the start time.
       var startEl = document.getElementById('rTime');
       var endEl = document.getElementById('rEndTime');
       var endField = endEl ? endEl.closest('.field') : null;
       var endErr = document.getElementById('rEndTimeErr');
-      var endVal = endEl && endEl.value ? endEl.value.trim() : '';
-      var startVal = startEl && startEl.value ? startEl.value.trim() : '';
+      var endVal = safeStr(endEl && endEl.value);
+      var startVal = safeStr(startEl && startEl.value);
       if (!endVal) {
-        // missing end time
-        if (endErr) {
-          endErr.setAttribute('data-en', 'Pick an end time.');
-          endErr.setAttribute('data-es', 'Escoge una hora de fin.');
-          endErr.textContent = currentLang === 'es' ? 'Escoge una hora de fin.' : 'Pick an end time.';
-        }
+        if (endErr) { endErr.textContent = currentLang === 'es' ? 'Escoge una hora de fin.' : 'Pick an end time.'; }
         setError(endField);
         if (!firstInvalid) firstInvalid = endEl;
       } else if (startVal && endVal <= startVal) {
-        // end time is not after the start time (HH:MM strings compare lexically = chronologically)
-        if (endErr) {
-          endErr.setAttribute('data-en', 'End time must be after the start time.');
-          endErr.setAttribute('data-es', 'La hora de fin debe ser posterior a la de inicio.');
-          endErr.textContent = currentLang === 'es' ? 'La hora de fin debe ser posterior a la de inicio.' : 'End time must be after the start time.';
-        }
+        if (endErr) { endErr.textContent = currentLang === 'es' ? 'La hora de fin debe ser posterior a la de inicio.' : 'End time must be after the start time.'; }
         setError(endField);
         if (!firstInvalid) firstInvalid = endEl;
-      } else {
-        clearError(endField);
-      }
+      } else { clearError(endField); }
 
-      // riders >= 1
-      var ridersOk = riders && clampRiders(riders.value) >= 1 && riders.value.trim() !== '';
-      if (!ridersOk) { setError(riders.closest('.field')); if (!firstInvalid) firstInvalid = riders; }
+      // riders 1..20
+      var ridersField = riders ? riders.closest('.field') : null;
+      var ridersVal = riders ? clampRiders(riders.value) : 0;
+      if (!ridersVal || ridersVal < 1) { setError(ridersField); if (!firstInvalid) firstInvalid = riders; }
+      else { if (riders) riders.value = ridersVal; clearError(ridersField); }
 
       // vehicle radio
       var vehChecked = document.querySelector('.vehicle-pills input:checked');
-      var vehField = document.querySelector('.vehicle-pills').closest('.field');
-      if (!vehChecked) { setError(vehField); if (!firstInvalid) firstInvalid = document.querySelector('.vehicle-pills input'); }
+      var vehPillsHost = document.querySelector('.vehicle-pills');
+      var vehField = vehPillsHost ? vehPillsHost.closest('.field') : null;
+      if (!vehChecked) { setError(vehField); if (!firstInvalid) firstInvalid = vehPillsHost ? vehPillsHost.querySelector('input') : null; }
       else clearError(vehField);
 
-      // at least one of phone/email
+      // at least one of phone/email, AND if provided each must look valid
       var phone = document.getElementById('rPhone');
       var email = document.getElementById('rEmail');
-      var contactOk = (phone && phone.value.trim()) || (email && email.value.trim());
+      var phoneVal = safeStr(phone && phone.value);
+      var emailVal = safeStr(email && email.value);
+      var contactOk = false;
+      if (phoneVal || emailVal) {
+        var phoneOk = !phoneVal || looksLikePhone(phoneVal);
+        var emailOk = !emailVal || looksLikeEmail(emailVal);
+        contactOk = phoneOk && emailOk && (phoneVal || emailVal);
+        if (!phoneOk) { setError(phone.closest('.field')); if (!firstInvalid) firstInvalid = phone; }
+        if (!emailOk) { setError(email.closest('.field')); if (!firstInvalid) firstInvalid = email; }
+      }
       if (!contactOk) {
-        var contactField = document.getElementById('rContactErr').closest('.field');
-        setError(contactField);
-        setError(phone.closest('.field'));
+        var contactErrEl = document.getElementById('rContactErr');
+        var contactField = contactErrEl ? contactErrEl.closest('.field') : null;
+        if (contactField) setError(contactField);
+        if (phone && !phoneVal && !emailVal) setError(phone.closest('.field'));
         if (!firstInvalid) firstInvalid = phone;
       }
 
@@ -370,88 +570,205 @@
       if (firstInvalid) {
         var y = firstInvalid.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
         window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
-        try { firstInvalid.focus({ preventScroll: true }); } catch (err) { firstInvalid.focus(); }
+        try { firstInvalid.focus({ preventScroll: true }); } catch (err) { try { firstInvalid.focus(); } catch (e2) {} }
         return;
       }
 
       // ---- valid: submitting state ----
+      isSubmitting = true;
       var btn = document.getElementById('submitBtn');
-      var label = btn.querySelector('.btn-label');
+      var label = btn ? btn.querySelector('.btn-label') : null;
       var labelText = currentLang === 'es' ? 'Enviando...' : 'Sending...';
-      btn.disabled = true;
-      label.innerHTML = '<span class="spinner" aria-hidden="true"></span> ' + labelText;
+      if (btn) btn.disabled = true;
+      if (label) {
+        // Build with DOM, never innerHTML with untrusted data
+        label.textContent = '';
+        var sp = document.createElement('span');
+        sp.className = 'spinner';
+        sp.setAttribute('aria-hidden', 'true');
+        label.appendChild(sp);
+        label.appendChild(document.createTextNode(' ' + labelText));
+      }
       var errorNotice = document.getElementById('formError');
       if (errorNotice) errorNotice.classList.remove('is-shown');
 
-      /*
-        SUBMIT IS STUBBED. Send/STORE destination for the reservation + signed waiver is TBD (per owner).
-        No network request is made and NO test submission is fired anywhere. We simulate the request
-        then show the success state.
+      // ---- assemble payload ----
+      var booking = collectBookingFields();
+      var summaryEN = buildBookingSummary(booking, 'en');
+      var summaryES = buildBookingSummary(booking, 'es');
+      var summary = currentLang === 'es' ? summaryES : summaryEN;
 
-        The payload below now ALSO carries the signed digital waiver. When the destination is known,
-        replace this timeout with a fetch(...) POSTing `payload`, and route the .catch() to showError().
+      // Auto-response shown to the customer; FormSubmit sends this to whoever's email is in `email`.
+      var autoresponse = (currentLang === 'es'
+        ? ('Hola ' + (booking.name || '') + ',\n\nRecibimos tu reserva en La Palapa ATV. Aquí están los detalles:\n\n' + summaryES + '\n\nTe esperamos en Puerto Peñasco. Si necesitas cambiar algo, contesta este correo o escríbenos al WhatsApp ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
+        : ('Hi ' + (booking.name || '') + ',\n\nWe received your booking at La Palapa ATV. Here are your details:\n\n' + summaryEN + '\n\nSee you in Puerto Penasco. If anything changes, reply to this email or WhatsApp us at ' + OWNER_PHONE_DISPLAY + '.\n\nLa Palapa ATV')
+      );
 
-        LEGAL-GRADE RECOMMENDATION when wiring this up: this is a binding rental contract, so the
-        signed waiver should be delivered AND stored durably (e.g. server-side), and ideally a
-        timestamped PDF/copy of exactly what the customer saw and signed should be generated and
-        retained. The signature is captured as a PNG data URL (if drawn) or the typed legal name.
-      */
-      var payload = {
-        reservation: {
-          date: document.getElementById('rDate').value || '',
-          time: document.getElementById('rTime').value || '', // kept for back-compat = start time
-          startTime: document.getElementById('rTime').value || '',
-          endTime: (document.getElementById('rEndTime') || {}).value || '',
-          vehicle: (document.querySelector('.vehicle-pills input:checked') || {}).value || '',
-          riders: riders ? clampRiders(riders.value) : null,
-          name: (document.getElementById('rName').value || '').trim(),
-          phone: (phone && phone.value.trim()) || '',
-          email: (email && email.value.trim()) || '',
-          notes: (document.getElementById('rNotes').value || '').trim()
-        },
-        waiver: waiverData // { signerName, agreement:true, signatureType, signature, customer:{...}, signedAtISO, signedPlace }
-      };
-      // payload is assembled for the future real endpoint; not posted anywhere in this stub.
-      void payload;
+      // FormSubmit hidden config: subject, cc to customer, replyto, autoresponse
+      var subjEl = document.getElementById('rFsSubject');
+      var ccEl = document.getElementById('rFsCc');
+      var replytoEl = document.getElementById('rFsReplyto');
+      var autoEl = document.getElementById('rFsAutoresponse');
+      if (subjEl) subjEl.value = 'La Palapa Booking: ' + (booking.name || 'New') + ' / ' + (booking.vehicle || 'vehicle') + ' / ' + (booking.date || todayISO());
+      if (ccEl) ccEl.value = booking.email; // customer copy
+      if (replytoEl) replytoEl.value = booking.email || ''; // replies go to customer
+      if (autoEl) autoEl.value = autoresponse;
 
-      setTimeout(function () { showSuccess(); }, 900);
+      // Build FormData. FormSubmit accepts multipart/form-data with file attachment.
+      var fd = new FormData();
+      // Use a label that reads cleanly in the email table:
+      fd.append('Name', booking.name);
+      fd.append('Phone', booking.phone);
+      fd.append('Email', booking.email);
+      fd.append('Vehicle', booking.vehicle);
+      fd.append('Riders', String(booking.riders));
+      fd.append('Date', booking.date);
+      fd.append('Start time', booking.startTime);
+      fd.append('End time', booking.endTime);
+      fd.append('Notes', booking.notes);
+      fd.append('Booking summary', summaryEN);
+      // Waiver detail
+      if (waiverData) {
+        fd.append('Waiver signed', 'YES');
+        fd.append('Waiver signer name', safeStr(waiverData.signerName, 120));
+        fd.append('Waiver signature type', safeStr(waiverData.signatureType));
+        fd.append('Waiver agreement', waiverData.agreement ? 'true' : 'false');
+        fd.append('Waiver signed at (ISO)', safeStr(waiverData.signedAtISO));
+        fd.append('Waiver signed place', safeStr(waiverData.signedPlace));
+        var c = waiverData.customer || {};
+        fd.append('Customer telephone', safeStr(c.telephone, 40));
+        fd.append('Customer address', safeStr(c.address, 200));
+        fd.append('Customer hotel', safeStr(c.hotel, 120));
+        fd.append('Customer room', safeStr(c.roomNo, 20));
+        fd.append('Customer check-in', safeStr(c.checkin));
+        fd.append('Customer check-out', safeStr(c.checkout));
+        if (waiverData.signatureType === 'drawn') {
+          var blob = dataURLToBlob(waiverData.signature);
+          if (blob) {
+            var fname = 'signature-' + (booking.name || 'customer').replace(/[^a-z0-9_-]+/gi, '_') + '-' + (booking.date || todayISO()) + '.png';
+            fd.append('signature_image', blob, fname);
+          } else {
+            // dataURL malformed for some reason; still include the raw value so nothing is lost
+            fd.append('signature_data_url', safeStr(waiverData.signature, 100000));
+          }
+        } else {
+          fd.append('Typed signature', safeStr(waiverData.signature, 120));
+        }
+      } else {
+        fd.append('Waiver signed', 'NO');
+      }
+      // FormSubmit config (these are also present as hidden fields, FormData picks them up via the form)
+      // We set them on the form already, but we append explicitly so the AJAX path doesn't lose them.
+      fd.set('_subject', subjEl ? subjEl.value : 'La Palapa booking');
+      fd.set('_template', 'table');
+      fd.set('_captcha', 'false');
+      if (booking.email) {
+        fd.set('_cc', booking.email);
+        fd.set('_replyto', booking.email);
+      }
+      fd.set('_autoresponse', autoresponse);
+      // The honeypot field if present (real users empty)
+      fd.set('_honey', safeStr(honey && honey.value));
+
+      postBooking(fd).then(function () {
+        isSubmitting = false;
+        showSuccess(false);
+      }, function (err) {
+        isSubmitting = false;
+        showError(booking, summary);
+        // Re-enable submit so the user can try again
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = currentLang === 'es' ? 'Reservar mi paseo' : 'Book my ride';
+      });
     });
   }
 
-  function showSuccess() {
+  function showSuccess(silent) {
     var card = document.getElementById('reserveCard');
-    var nameVal = (document.getElementById('rName').value || '').trim();
+    var nameVal = safeStr(document.getElementById('rName') && document.getElementById('rName').value);
     var vehChecked = document.querySelector('.vehicle-pills input:checked');
-    var vehName = vehChecked ? vehChecked.value : '';
-    var dateVal = document.getElementById('rDate').value || '';
+    var vehName = vehChecked ? safeStr(vehChecked.value) : '';
+    var dateVal = safeStr(document.getElementById('rDate') && document.getElementById('rDate').value);
     var body = document.getElementById('successBody');
     if (body) {
+      // Use textContent (no HTML injection risk)
       if (currentLang === 'es') {
-        body.textContent = '¡Listo' + (nameVal ? ' ' + nameVal : '') + '! Tu ' + vehName + (dateVal ? ' del ' + dateVal : '') + ' quedó reservado. Revisa tu teléfono para los detalles de tu reserva. Nos vemos en la arena.';
+        body.textContent = '¡Listo' + (nameVal ? ', ' + nameVal : '') + '! Tu ' + vehName + (dateVal ? ' del ' + dateVal : '') + ' quedó reservado. Te enviamos un correo con la confirmación y una copia del contrato firmado. Nos vemos en la arena.';
       } else {
-        body.textContent = 'You are booked' + (nameVal ? ', ' + nameVal : '') + '! Your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' is reserved. Check your phone for your booking details. See you on the sand.';
+        body.textContent = 'You are booked' + (nameVal ? ', ' + nameVal : '') + '! Your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' is reserved. We sent you an email with the confirmation and a copy of the signed waiver. See you on the sand.';
       }
     }
+    // Wire success WhatsApp button so customer can also ping the team
+    try {
+      var b = collectBookingFields();
+      var summary = buildBookingSummary(b, currentLang);
+      var waBtn = document.getElementById('successWhatsapp');
+      if (waBtn) waBtn.setAttribute('href', buildWhatsappURL(summary));
+    } catch (e) { /* never let summary build error block success */ }
+
     if (card) card.classList.add('is-success');
     var success = document.getElementById('reserveSuccess');
-    if (success) {
+    if (success && card) {
       var y = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
       window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
       success.setAttribute('tabindex', '-1');
-      success.focus({ preventScroll: true });
+      try { success.focus({ preventScroll: true }); } catch (e) {}
     }
   }
 
-  /* exposed for future real-endpoint error handling */
-  function showError() {
-    var btn = document.getElementById('submitBtn');
-    var label = btn.querySelector('.btn-label');
-    btn.disabled = false;
-    label.textContent = currentLang === 'es' ? 'Reservar mi paseo' : 'Book my ride';
-    var errorNotice = document.getElementById('formError');
-    if (errorNotice) errorNotice.classList.add('is-shown');
+  /* Show the structured fallback error UI with WhatsApp + mailto preserving the customer's booking */
+  function showError(booking, summary) {
+    var notice = document.getElementById('formError');
+    if (!notice) return;
+    booking = booking || collectBookingFields();
+    summary = summary || buildBookingSummary(booking, currentLang);
+    var wa = document.getElementById('formErrorWhatsapp');
+    var ml = document.getElementById('formErrorMailto');
+    if (wa) wa.setAttribute('href', buildWhatsappURL(summary));
+    if (ml) ml.setAttribute('href', buildMailtoURL(summary, booking));
+    notice.classList.add('is-shown');
+    // bring it into view
+    var y = notice.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
+    window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
   }
-  window.__lpShowError = showError; // available if a real endpoint is wired later
+  // Retry button: hide the error UI and re-arm submit
+  var formErrorRetry = document.getElementById('formErrorRetry');
+  if (formErrorRetry) {
+    formErrorRetry.addEventListener('click', function () {
+      var notice = document.getElementById('formError');
+      if (notice) notice.classList.remove('is-shown');
+      var b = document.getElementById('submitBtn');
+      if (b) b.disabled = false;
+    });
+  }
+  window.__lpShowError = showError; // diagnostic hook
+
+  // If the form was submitted natively (no JS at the time, or a network fallback) and
+  // FormSubmit redirected back here with ?booked=1, show the success state on load.
+  // This is a backstop so the customer is never left on a half-loaded form after success.
+  try {
+    var bp = new URLSearchParams(window.location.search);
+    if (bp.get('booked') === '1') {
+      // Strip the ?booked=1 from the URL so a refresh doesn't replay this state.
+      try { history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
+      // Defer to after the loader so the user sees the success card cleanly.
+      setTimeout(function () {
+        var body = document.getElementById('successBody');
+        if (body) {
+          body.textContent = currentLang === 'es'
+            ? '¡Tu reserva se envió! Revisa tu correo para la confirmación y una copia del contrato firmado.'
+            : 'Your booking was sent! Check your email for the confirmation and a copy of the signed waiver.';
+        }
+        var card = document.getElementById('reserveCard');
+        if (card) card.classList.add('is-success');
+        var success = document.getElementById('reserveSuccess');
+        if (success && card) {
+          var y2 = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
+          window.scrollTo({ top: y2, behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+      }, 200);
+    }
+  } catch (e) { /* harmless if URLSearchParams not available */ }
 
   // reset / reserve another
   var resetBtn = document.getElementById('resetForm');
