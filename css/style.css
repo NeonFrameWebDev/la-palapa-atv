@@ -284,7 +284,7 @@ strong { font-weight: 600; }
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
     linear-gradient(to top, rgba(10,10,10,0.94) 0%, rgba(10,10,10,0.55) 40%, rgba(10,10,10,0.25) 70%, rgba(10,10,10,0.45) 100%),
-    linear-gradient(to right, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.1) 55%, rgba(10,10,10,0) 100%);
+    linear-gradient(to right, rgba(10,10,10,0.78) 0%, rgba(10,10,10,0.45) 35%, rgba(10,10,10,0.12) 55%, rgba(10,10,10,0) 75%);
 }
 .hero__vignette {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -292,6 +292,17 @@ strong { font-weight: 600; }
   mix-blend-mode: screen;
 }
 .hero .wrap { position: relative; z-index: 4; }
+/* Desktop: anchor hero copy to the LEFT half so the machines on the right of the photo stay clear.
+   max-width clamp keeps the h1 ("Hit the dunes. / Hit the beach.") on a single line at every desktop width
+   while still leaving room on the right for the fleet to be visible. */
+@media (min-width: 900px) {
+  .hero .wrap {
+    max-width: clamp(620px, 48vw, 780px);
+    margin-left: max(var(--gutter), calc((100vw - var(--max-w)) / 2 + var(--gutter)));
+    margin-right: auto;
+    padding-left: 0;
+  }
+}
 .hero__kicker { font-size: clamp(1.4rem, 6vw, 2.2rem); color: var(--gold-soft); margin-bottom: 0.4rem; text-shadow: 0 2px 18px rgba(0,0,0,0.6); }
 .hero__title { color: var(--cream); margin-bottom: 1rem; text-shadow: 0 4px 30px rgba(0,0,0,0.55); }
 .hero__title .accent { color: var(--red); }
