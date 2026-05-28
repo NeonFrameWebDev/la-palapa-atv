@@ -931,6 +931,9 @@ strong { font-weight: 600; }
 
 /* Subpages have no tall hero, so the first section must clear the fixed nav. */
 .section--page-top { padding-top: calc(var(--nav-h) + clamp(2.25rem, 6vw, 4rem)); }
+/* The decorative section-number (01, 02, etc.) on subpages must also clear the nav,
+   otherwise it sits ABOVE the page-top padding and gets clipped behind the fixed nav. */
+.section--page-top .section__num { top: calc(var(--nav-h) + clamp(1rem, 3vw, 2rem)); }
 
 /* Centered call-to-action under a section's content. Bottom margin gives breathing room
    above the dust-wipe flag-stripe divider so the button never sits on the white band. */
