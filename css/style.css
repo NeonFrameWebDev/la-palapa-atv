@@ -657,14 +657,22 @@ strong { font-weight: 600; }
 .why-stat__label { display: block; margin-top: 0.3rem; font-size: 0.92rem; color: var(--cream-dim); }
 
 /* ==========================================================================
-   Gallery
+   Gallery: uniform 4:3 grid, every thumb the same size regardless of source ratio
    ========================================================================== */
-.gallery__grid { columns: 1; column-gap: 0.9rem; position: relative; z-index: 1; }
-.gallery__item {
-  position: relative; break-inside: avoid; margin-bottom: 0.9rem; border-radius: 8px;
-  overflow: hidden; cursor: pointer; background: var(--ink-2); display: block; width: 100%;
+.gallery__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 1;
 }
-.gallery__item img { width: 100%; height: auto; transition: transform 0.5s var(--ease-out); }
+.gallery__item {
+  position: relative; border-radius: 8px;
+  overflow: hidden; cursor: pointer; background: var(--ink-2); display: block; width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0; border: 0;
+}
+.gallery__item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-out); }
 .gallery__item:hover img { transform: scale(1.05); }
 .gallery__item .cap {
   position: absolute; left: 0.8rem; bottom: 0.6rem; font-family: var(--font-hand);
@@ -777,7 +785,7 @@ strong { font-weight: 600; }
   .form-grid { grid-template-columns: 1fr 1fr; }
   .field--full { grid-column: 1 / -1; }
   .fleet__grid { grid-template-columns: 1fr 1fr; }
-  .gallery__grid { columns: 2; }
+  .gallery__grid { grid-template-columns: 1fr 1fr; }
   .foot__grid { grid-template-columns: 2fr 1fr 1fr; }
 }
 
@@ -795,7 +803,7 @@ strong { font-weight: 600; }
   .nav__menu-btn { display: none; }
   .rail { display: flex; }
   .fleet__grid { grid-template-columns: repeat(4, 1fr); }
-  .gallery__grid { columns: 3; }
+  .gallery__grid { grid-template-columns: repeat(3, 1fr); }
   .why__layout { grid-template-columns: 1.05fr 1fr; gap: 3rem; }
   .steps { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
   .visit__layout { grid-template-columns: 1fr 1fr; gap: 3rem; }
