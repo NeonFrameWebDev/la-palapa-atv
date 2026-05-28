@@ -525,13 +525,6 @@ strong { font-weight: 600; }
 .vehicle-pills .pill:has(input:checked) { border-color: var(--red); background: #fff5f3; box-shadow: 0 0 0 1.5px var(--red) inset; }
 .vehicle-pills .pill:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(212,137,42,0.3); }
 
-/* number stepper */
-.stepper { display: inline-flex; align-items: stretch; border: 1.5px solid var(--panel-line); border-radius: var(--radius); overflow: hidden; width: max-content; }
-.stepper button { width: 46px; font-size: 1.3rem; line-height: 1; color: var(--near-black); background: var(--panel-2); transition: background 0.15s ease; }
-.stepper button:hover { background: var(--sand); color: var(--ink); }
-.stepper input { width: 64px; text-align: center; border: 0; border-left: 1.5px solid var(--panel-line); border-right: 1.5px solid var(--panel-line); border-radius: 0; }
-.stepper input:focus { box-shadow: none; }
-
 .form-submit { margin-top: 1.4rem; }
 .form-submit .btn { width: 100%; }
 .form-submit .btn[disabled] { opacity: 0.85; cursor: progress; }

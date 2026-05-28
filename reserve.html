@@ -244,16 +244,6 @@
             </div>
 
             <div class="field">
-              <label for="rRiders"><span data-en="How many riders" data-es="Cuántos van">How many riders</span> <span class="req" aria-hidden="true">*</span></label>
-              <div class="stepper">
-                <button type="button" id="ridersMinus" aria-label="Fewer riders">&minus;</button>
-                <input type="number" id="rRiders" name="riders" min="1" max="20" value="1" inputmode="numeric" required aria-required="true" aria-describedby="rRidersErr">
-                <button type="button" id="ridersPlus" aria-label="More riders">+</button>
-              </div>
-              <span class="field__error" id="rRidersErr" data-en="Add at least one rider." data-es="Agrega al menos un pasajero.">Add at least one rider.</span>
-            </div>
-
-            <div class="field">
               <label for="rName"><span data-en="Name" data-es="Nombre">Name</span> <span class="req" aria-hidden="true">*</span></label>
               <input type="text" id="rName" name="name" autocomplete="name" required aria-required="true" aria-describedby="rNameErr">
               <span class="field__error" id="rNameErr" data-en="Tell us your name." data-es="Dinos tu nombre.">Tell us your name.</span>
@@ -270,14 +260,6 @@
               <input type="email" id="rEmail" name="email" autocomplete="email" aria-describedby="rContactErr"
                      data-placeholder-en="you@email.com" data-placeholder-es="tu@correo.com" placeholder="you@email.com">
               <span class="field__error" id="rContactErr" data-en="Add a phone or email so we can send your booking details." data-es="Agrega un teléfono o correo para enviarte los detalles de tu reserva.">Add a phone or email so we can send your booking details.</span>
-            </div>
-
-            <div class="field field--full">
-              <label for="rNotes"><span data-en="Notes" data-es="Notas">Notes</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
-              <textarea id="rNotes" name="notes"
-                        data-placeholder-en="Anything we should know? Group size, experience, special requests."
-                        data-placeholder-es="¿Algo que debamos saber? Tamaño del grupo, experiencia, peticiones especiales."
-                        placeholder="Anything we should know? Group size, experience, special requests."></textarea>
             </div>
 
             <!-- REQUIRED: digital rental agreement / waiver step (replaces the paper waiver) -->

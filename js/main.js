@@ -275,15 +275,6 @@
     dateInput.min = iso;
   }
 
-  // number stepper
-  var riders = document.getElementById('rRiders');
-  var plus = document.getElementById('ridersPlus');
-  var minus = document.getElementById('ridersMinus');
-  function clampRiders(v) { v = parseInt(v, 10); if (isNaN(v) || v < 1) v = 1; if (v > 20) v = 20; return v; }
-  if (plus) plus.addEventListener('click', function () { riders.value = clampRiders(riders.value) + 1; clearError(riders.closest('.field')); });
-  if (minus) minus.addEventListener('click', function () { riders.value = clampRiders(riders.value) - 1; clearError(riders.closest('.field')); });
-  if (riders) riders.addEventListener('input', function () { riders.value = riders.value.replace(/[^0-9]/g, ''); });
-
   /* =====================================================
      Live price summary: vehicle rate * hours (updates as user picks)
      ===================================================== */
@@ -431,11 +422,9 @@
       startTime: safeStr(document.getElementById('rTime') && document.getElementById('rTime').value),
       endTime:   safeStr(document.getElementById('rEndTime') && document.getElementById('rEndTime').value),
       vehicle:   vehChecked ? safeStr(vehChecked.value) : '',
-      riders:    riders ? clampRiders(riders.value) : 1,
       name:      safeStr(document.getElementById('rName') && document.getElementById('rName').value, 120),
       phone:     safeStr(phone && phone.value, 40),
-      email:     safeStr(email && email.value, 254),
-      notes:     safeStr(document.getElementById('rNotes') && document.getElementById('rNotes').value, 2000)
+      email:     safeStr(email && email.value, 254)
     };
   }
 
@@ -445,14 +434,14 @@
       title: 'Reserva La Palapa ATV',
       name: 'Nombre', phone: 'Teléfono', email: 'Correo',
       date: 'Fecha', start: 'Inicio', end: 'Fin',
-      vehicle: 'Vehículo', riders: 'Pasajeros', notes: 'Notas',
+      vehicle: 'Vehículo',
       signed: 'Contrato firmado', signedYes: 'Sí, firmado digitalmente',
       none: '(ninguno)'
     } : {
       title: 'La Palapa ATV Booking',
       name: 'Name', phone: 'Phone', email: 'Email',
       date: 'Date', start: 'Start', end: 'End',
-      vehicle: 'Vehicle', riders: 'Riders', notes: 'Notes',
+      vehicle: 'Vehicle',
       signed: 'Waiver signed', signedYes: 'Yes, signed digitally',
       none: '(none)'
     };
@@ -464,12 +453,10 @@
       L.email + ': ' + (b.email || L.none),
       '',
       L.vehicle + ': ' + (b.vehicle || L.none),
-      L.riders + ': ' + b.riders,
       L.date + ': ' + (b.date || L.none),
       L.start + ': ' + (b.startTime || L.none),
       L.end + ': ' + (b.endTime || L.none)
     ];
-    if (b.notes) { lines.push(''); lines.push(L.notes + ': ' + b.notes); }
     lines.push('');
     lines.push(L.signed + ': ' + (waiverData ? L.signedYes : L.none));
     return lines.join('\n');
@@ -581,12 +568,6 @@
         if (!firstInvalid) firstInvalid = endEl;
       } else { clearError(endField); }
 
-      // riders 1..20
-      var ridersField = riders ? riders.closest('.field') : null;
-      var ridersVal = riders ? clampRiders(riders.value) : 0;
-      if (!ridersVal || ridersVal < 1) { setError(ridersField); if (!firstInvalid) firstInvalid = riders; }
-      else { if (riders) riders.value = ridersVal; clearError(ridersField); }
-
       // vehicle radio
       var vehChecked = document.querySelector('.vehicle-pills input:checked');
       var vehPillsHost = document.querySelector('.vehicle-pills');
@@ -676,11 +657,9 @@
       fd.append('Phone', booking.phone);
       fd.append('Email', booking.email);
       fd.append('Vehicle', booking.vehicle);
-      fd.append('Riders', String(booking.riders));
       fd.append('Date', booking.date);
       fd.append('Start time', booking.startTime);
       fd.append('End time', booking.endTime);
-      fd.append('Notes', booking.notes);
       fd.append('Booking summary', summaryEN);
       // Waiver detail
       if (waiverData) {
@@ -832,7 +811,6 @@
       var card = document.getElementById('reserveCard');
       if (card) card.classList.remove('is-success');
       form.reset();
-      if (riders) riders.value = 1;
       var btn = document.getElementById('submitBtn');
       var label = btn.querySelector('.btn-label');
       btn.disabled = false;
