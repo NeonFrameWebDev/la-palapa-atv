@@ -276,8 +276,8 @@ strong { font-weight: 600; }
 .hero__media { position: absolute; inset: 0; z-index: 0; }
 .hero__media img {
   width: 100%; height: 100%; object-fit: cover; object-position: center 38%;
-  transform: scale(1.08); transition: transform 7s ease-out;
-  filter: saturate(1.08) contrast(1.06);
+  transform: scale(1.04); transition: transform 7s ease-out;
+  filter: saturate(1.12) contrast(1.1) brightness(1.0);
 }
 .hero.is-loaded .hero__media img { transform: scale(1); }
 .hero__scrim {
@@ -739,6 +739,11 @@ strong { font-weight: 600; }
 .foot__col ul { display: flex; flex-direction: column; gap: 0.5rem; }
 .foot__col a, .foot__col li { color: var(--cream-dim); font-size: 0.95rem; }
 .foot__col a:hover { color: var(--gold); }
+/* Instagram icon link in footer */
+.foot__ig { display: inline-flex; align-items: center; gap: 0.45rem; transition: color 0.18s ease; }
+.foot__ig .ig-icon { flex: none; width: 20px; height: 20px; }
+.foot__ig:hover { color: var(--gold); }
+.foot__ig:hover .ig-icon { color: var(--gold); }
 .foot__signoff { font-family: var(--font-hand); font-weight: 700; font-size: 1.6rem; color: var(--gold); margin-top: 1rem; }
 .foot__bottom {
   margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(200,169,106,0.14);
@@ -818,8 +823,9 @@ strong { font-weight: 600; }
 /* Subpages have no tall hero, so the first section must clear the fixed nav. */
 .section--page-top { padding-top: calc(var(--nav-h) + clamp(2.25rem, 6vw, 4rem)); }
 
-/* Centered call-to-action under a section's content. */
-.section__cta { position: relative; z-index: 1; margin-top: clamp(2rem, 5vw, 3rem); text-align: center; }
+/* Centered call-to-action under a section's content. Bottom margin gives breathing room
+   above the dust-wipe flag-stripe divider so the button never sits on the white band. */
+.section__cta { position: relative; z-index: 1; margin-top: clamp(2rem, 5vw, 3rem); margin-bottom: clamp(2rem, 5vw, 3rem); text-align: center; }
 .section__cta .btn { min-width: 220px; }
 
 /* Home "fleet at a glance" cards hide the long description for a tighter teaser. */
