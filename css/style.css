@@ -286,22 +286,47 @@ strong { font-weight: 600; }
     linear-gradient(to top, rgba(10,10,10,0.94) 0%, rgba(10,10,10,0.55) 40%, rgba(10,10,10,0.25) 70%, rgba(10,10,10,0.45) 100%),
     linear-gradient(to right, rgba(10,10,10,0.78) 0%, rgba(10,10,10,0.45) 35%, rgba(10,10,10,0.12) 55%, rgba(10,10,10,0) 75%);
 }
+/* Desktop: dedicated dark "text panel" on the left of the hero so the copy has its own
+   space and the fleet photo gets the right side cleanly. Below 900px this disappears
+   and the original full-bleed photo + bottom scrim layout takes over. */
+@media (min-width: 900px) {
+  .hero__scrim {
+    background:
+      linear-gradient(to right,
+        rgba(10,10,10,0.96) 0%,
+        rgba(10,10,10,0.96) 32%,
+        rgba(10,10,10,0.72) 42%,
+        rgba(10,10,10,0.32) 52%,
+        rgba(10,10,10,0.05) 62%,
+        rgba(10,10,10,0) 70%),
+      linear-gradient(to top, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.15) 35%, rgba(10,10,10,0) 60%);
+  }
+}
 .hero__vignette {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: radial-gradient(120% 90% at 75% 30%, rgba(212,137,42,0.22), rgba(212,137,42,0) 55%);
   mix-blend-mode: screen;
 }
 .hero .wrap { position: relative; z-index: 4; }
-/* Desktop: anchor hero copy to the LEFT half so the machines on the right of the photo stay clear.
-   max-width clamp keeps the h1 ("Hit the dunes. / Hit the beach.") on a single line at every desktop width
-   while still leaving room on the right for the fleet to be visible. */
+/* Desktop: anchor hero copy to the LEFT panel created by the heavy left-side scrim above.
+   Text starts at the gutter from the viewport edge (further left than the rest of the page so
+   it sits FULLY inside the dark text-panel area, not centered with the rest of the layout). */
 @media (min-width: 900px) {
+  .hero {
+    /* center vertically inside the left panel, not flex-end at the bottom, so the copy reads
+       like an editorial hero with the photo as a feature beside it */
+    align-items: center;
+    padding-bottom: 0;
+  }
   .hero .wrap {
-    max-width: clamp(620px, 48vw, 780px);
-    margin-left: max(var(--gutter), calc((100vw - var(--max-w)) / 2 + var(--gutter)));
+    /* min big enough for "HIT THE DUNES." in Anton at the h1's max font (~104px) to fit */
+    max-width: clamp(460px, 42vw, 560px);
+    margin-left: var(--gutter);
     margin-right: auto;
     padding-left: 0;
   }
+  /* In the editorial layout, the h1 line-height can tighten a touch */
+  .hero__title { line-height: 1.0; }
 }
 .hero__kicker { font-size: clamp(1.4rem, 6vw, 2.2rem); color: var(--gold-soft); margin-bottom: 0.4rem; text-shadow: 0 2px 18px rgba(0,0,0,0.6); }
 .hero__title { color: var(--cream); margin-bottom: 1rem; text-shadow: 0 4px 30px rgba(0,0,0,0.55); }
