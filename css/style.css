@@ -764,6 +764,41 @@ strong { font-weight: 600; }
 }
 
 /* ==========================================================================
+   Multipage additions (nav active state, page-top spacing, section CTAs,
+   home teasers, reserve CTA band). Layout/visual language unchanged.
+   ========================================================================== */
+
+/* Active nav tab: keep the gold underline permanently shown + bolder label. */
+.nav__links a.is-active { color: var(--gold); }
+.menu__links a.is-active { color: var(--gold); }
+@media (min-width: 900px) {
+  .nav__links a.is-active::after { width: 100%; }
+}
+
+/* Subpages have no tall hero, so the first section must clear the fixed nav. */
+.section--page-top { padding-top: calc(var(--nav-h) + clamp(2.25rem, 6vw, 4rem)); }
+
+/* Centered call-to-action under a section's content. */
+.section__cta { position: relative; z-index: 1; margin-top: clamp(2rem, 5vw, 3rem); text-align: center; }
+.section__cta .btn { min-width: 220px; }
+
+/* Home "fleet at a glance" cards hide the long description for a tighter teaser. */
+#fleet-teaser .fleet-card__desc { display: none; }
+
+/* Home condensed Why stats: same grid, just used standalone (no photo column). */
+.why__stats--teaser { margin-top: clamp(1rem, 3vw, 1.5rem); }
+
+/* Home strong Reserve CTA band. */
+.reserve-band__inner { position: relative; z-index: 1; max-width: 52ch; }
+.reserve-band__inner h2 { margin: 0.5rem 0 0.6rem; }
+.reserve-band__ctas { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: clamp(1.5rem, 4vw, 2rem); }
+.reserve-band .section--light .section__intro,
+.reserve-band .section__intro { color: #57534a; }
+
+/* Visit address line: readable, allow it to wrap on narrow screens. */
+.visit__address { line-height: 1.5; }
+
+/* ==========================================================================
    Reduced motion (honored everywhere, non-negotiable)
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {

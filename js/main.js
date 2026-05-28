@@ -123,7 +123,12 @@
     if (progressTop) progressTop.style.width = pct + '%';
     if (railFill) railFill.style.height = pct + '%';
     if (railPct) railPct.textContent = Math.round(pct);
-    if (nav) { if (y > 20) nav.classList.add('is-scrolled'); else nav.classList.remove('is-scrolled'); }
+    // Nav solidifies on scroll. On pages without a hero (subpages) it stays solid
+    // at the top too, since there is no tall hero behind it.
+    if (nav) {
+      if (y > 20 || !hero) nav.classList.add('is-scrolled');
+      else nav.classList.remove('is-scrolled');
+    }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
@@ -179,10 +184,12 @@
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }
   }
+  // Same-page fleet cards (only present if the fleet section is on this page).
   $$('.fleet-card__reserve[data-vehicle]').forEach(function (a) {
     a.addEventListener('click', function () { preselectVehicle(a.getAttribute('data-vehicle')); });
   });
-  // deep-link support, e.g. #reserve?vehicle=canam style via ?vehicle=
+  // Cross-page deep link: reserve.html?vehicle=KEY (KEY = atv | rzr2 | rzr4 | canam).
+  // Runs on every page load; preselectVehicle null-guards when the form is absent.
   (function () {
     var params = new URLSearchParams(window.location.search);
     var v = params.get('vehicle');
@@ -420,9 +427,9 @@
     var body = document.getElementById('successBody');
     if (body) {
       if (currentLang === 'es') {
-        body.textContent = '¡Gracias' + (nameVal ? ' ' + nameVal : '') + '! Te confirmamos tu ' + vehName + (dateVal ? ' para el ' + dateVal : '') + ' por mensaje o correo en breve. Abrimos diario, 9 AM al atardecer.';
+        body.textContent = '¡Listo' + (nameVal ? ' ' + nameVal : '') + '! Tu ' + vehName + (dateVal ? ' del ' + dateVal : '') + ' quedó reservado. Revisa tu teléfono para los detalles de tu reserva. Nos vemos en la arena.';
       } else {
-        body.textContent = 'Thanks' + (nameVal ? ' ' + nameVal : '') + '! We will confirm your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' by text or email shortly. We are open daily, 9 AM til sunset.';
+        body.textContent = 'You are booked' + (nameVal ? ', ' + nameVal : '') + '! Your ' + vehName + (dateVal ? ' for ' + dateVal : '') + ' is reserved. Check your phone for your booking details. See you on the sand.';
       }
     }
     if (card) card.classList.add('is-success');
@@ -440,7 +447,7 @@
     var btn = document.getElementById('submitBtn');
     var label = btn.querySelector('.btn-label');
     btn.disabled = false;
-    label.textContent = currentLang === 'es' ? 'Enviar mi solicitud' : 'Send my request';
+    label.textContent = currentLang === 'es' ? 'Reservar mi paseo' : 'Book my ride';
     var errorNotice = document.getElementById('formError');
     if (errorNotice) errorNotice.classList.add('is-shown');
   }
@@ -457,7 +464,7 @@
       var btn = document.getElementById('submitBtn');
       var label = btn.querySelector('.btn-label');
       btn.disabled = false;
-      label.textContent = currentLang === 'es' ? 'Enviar mi solicitud' : 'Send my request';
+      label.textContent = currentLang === 'es' ? 'Reservar mi paseo' : 'Book my ride';
       $$('#reserveForm .field').forEach(function (f) { f.classList.remove('has-error'); });
       resetWaiver();
       var y = card.getBoundingClientRect().top + window.scrollY - navOffset() - 8;

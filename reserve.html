@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+
+<!-- Primary title/description. data-en/data-es lets the JS toggle swap these live. -->
+<title data-en="Reserve Your Ride, Instant Booking | La Palapa ATV'S" data-es="Reserva Tu Paseo, Reserva Instantánea | La Palapa ATV'S">Reserve Your Ride, Instant Booking | La Palapa ATV'S</title>
+<meta name="description" id="metaDescription" content="Book your ATV, RZR, or Can-Am in Puerto Penasco. Instant booking: pick your time, sign the waiver, and your ride is reserved. Open daily, 9 AM til sunset.">
+<meta name="keywords" content="ATV rentals Rocky Point, side by side rentals Puerto Penasco, RZR rental Rocky Point, Can-Am rental Sonora, dune buggy rentals Rocky Point, La Palapa ATV, Puerto Penasco ATV, renta de ATV Puerto Penasco">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="La Palapa ATV'S">
+<meta name="geo.region" content="MX-SON">
+<meta name="geo.placename" content="Puerto Penasco, Sonora">
+
+<link rel="canonical" href="https://neonframewebdev.github.io/la-palapa-atv/reserve.html">
+<!-- hreflang: EN primary/default, ES toggle, x-default to EN -->
+<link rel="alternate" hreflang="en" href="https://neonframewebdev.github.io/la-palapa-atv/reserve.html">
+<link rel="alternate" hreflang="es" href="https://neonframewebdev.github.io/la-palapa-atv/reserve.html?lang=es">
+<link rel="alternate" hreflang="x-default" href="https://neonframewebdev.github.io/la-palapa-atv/reserve.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="business.business">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_MX">
+<meta property="og:title" content="Reserve Your Ride, Instant Booking | La Palapa ATV'S">
+<meta property="og:description" content="Instant booking. Pick your time, sign the waiver, and your ride is reserved. Open daily, 9 AM til sunset.">
+<meta property="og:image" content="https://neonframewebdev.github.io/la-palapa-atv/assets/og-image.jpg">
+<meta property="og:image:alt" content="La Palapa ATV'S entrance in Puerto Penasco with the rental fleet and papel picado, Open Every Day">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<!-- og:url points to the GitHub Pages preview during the spec phase; Bolt re-points to the customer domain at delivery. -->
+<meta property="og:url" content="https://neonframewebdev.github.io/la-palapa-atv/reserve.html">
+<meta property="og:site_name" content="La Palapa ATV'S">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reserve Your Ride, Instant Booking | La Palapa ATV'S">
+<meta name="twitter:description" content="Instant booking. Pick your time, sign the waiver, and your ride is reserved. Open daily, 9 AM til sunset.">
+<meta name="twitter:image" content="https://neonframewebdev.github.io/la-palapa-atv/assets/og-image.jpg">
+<meta name="twitter:image:alt" content="La Palapa ATV'S, Open Every Day, Puerto Penasco Rocky Point">
+
+<!-- Icons -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<!-- Fonts: single request, display=swap, preconnect + print-swap trick so fonts never block render -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<a class="skip" href="#main" data-en="Skip to content" data-es="Saltar al contenido">Skip to content</a>
+
+<!-- ===================== Loader (once per session, any page) ===================== -->
+<div class="loader" id="loader" aria-hidden="true">
+  <img class="loader__logo" src="assets/logo_nav.webp" width="480" height="320" alt="">
+  <hr class="flag-stripe loader__stripe">
+  <div class="loader__track"><div class="loader__bar"></div></div>
+  <div class="loader__meta" data-en="Throttle ready" data-es="Listos para arrancar">Throttle ready</div>
+</div>
+
+<div class="progress-top" id="progressTop"></div>
+
+<!-- Speedometer rail (desktop only) -->
+<aside class="rail" aria-hidden="true">
+  <span class="rail__label">La Palapa</span>
+  <div class="rail__track"><div class="rail__fill" id="railFill"></div></div>
+  <span class="rail__pct" id="railPct">0</span>
+</aside>
+
+<!-- ===================== Nav ===================== -->
+<nav class="nav is-scrolled" id="nav" aria-label="Primary">
+  <div class="wrap nav__inner">
+    <a class="nav__brand" href="index.html" aria-label="La Palapa ATV'S, home">
+      <img class="nav__logo" src="assets/logo_nav.webp" width="480" height="320" alt="La Palapa ATV'S logo" fetchpriority="high">
+      <span class="flag-stripe" aria-hidden="true"></span>
+    </a>
+    <div class="nav__right">
+      <ul class="nav__links">
+        <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+        <li><a href="reserve.html" class="is-active" aria-current="page" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+        <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+        <li><a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a></li>
+        <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+        <li><a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a></li>
+      </ul>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <a class="btn btn--red nav__cta" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+      <button class="nav__menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <span class="nav__menu-btn__bars" aria-hidden="true"><span></span><span></span></span>
+        <span data-en="Menu" data-es="Menú">Menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Full-screen mobile menu -->
+<aside class="menu" id="menu" aria-label="Site menu">
+  <div class="menu__top">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+    <button class="menu__close" id="menuClose" data-en="Close" data-es="Cerrar">Close</button>
+  </div>
+  <nav class="menu__links" aria-label="Mobile">
+    <a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a>
+    <a href="reserve.html" class="is-active" aria-current="page" data-en="Reserve" data-es="Reserva">Reserve</a>
+    <a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a>
+    <a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a>
+    <a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a>
+    <a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a>
+  </nav>
+  <div class="menu__cta">
+    <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  </div>
+</aside>
+
+<main id="main">
+<!-- ===================== Reserve (conversion goal) ===================== -->
+<section class="section section--light reserve section--page-top" id="reserve">
+  <span class="section__num" aria-hidden="true">02</span>
+  <div class="wrap">
+    <div class="reserve__card" id="reserveCard">
+      <div class="reserve__header">
+        <h2 data-en="Reserve your ride" data-es="Reserva tu paseo">Reserve your ride</h2>
+        <p class="sub" data-en="Instant booking. Pick your time, sign the waiver, and your ride is reserved. No payment now." data-es="Reserva instantánea. Escoge tu hora, firma el contrato y tu paseo queda apartado. Sin pago ahora.">Instant booking. Pick your time, sign the waiver, and your ride is reserved. No payment now.</p>
+      </div>
+
+      <div class="reserve__body">
+        <!--
+          INSTANT BOOKING FORM.
+          SEND DESTINATION IS TBD (owner email and/or WhatsApp not yet provided).
+          The submit handler in js/main.js is stubbed to the confirmed-booking success state and does NOT post anywhere.
+          When the owner confirms the destination, set a real action/endpoint here and wire the fetch in main.js.
+          action="[OWNER EMAIL / FORM ENDPOINT - TBD]"
+        -->
+        <form id="reserveForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="rDate"><span data-en="Date" data-es="Fecha">Date</span> <span class="req" aria-hidden="true">*</span></label>
+              <input type="date" id="rDate" name="date" required aria-required="true" aria-describedby="rDateErr">
+              <span class="field__error" id="rDateErr" data-en="Pick a date." data-es="Escoge una fecha.">Pick a date.</span>
+            </div>
+
+            <div class="field">
+              <label for="rTime"><span data-en="Start time" data-es="Hora de inicio">Start time</span> <span class="req" aria-hidden="true">*</span></label>
+              <select id="rTime" name="time" required aria-required="true" aria-describedby="rTimeErr">
+                <option value="" data-en="Choose a start time" data-es="Escoge la hora de inicio">Choose a start time</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="19:00">7:00 PM</option>
+              </select>
+              <span class="field__error" id="rTimeErr" data-en="Pick a start time." data-es="Escoge una hora de inicio.">Pick a start time.</span>
+            </div>
+
+            <div class="field">
+              <label for="rEndTime"><span data-en="End time" data-es="Hora de fin">End time</span> <span class="req" aria-hidden="true">*</span></label>
+              <select id="rEndTime" name="endTime" required aria-required="true" aria-describedby="rEndTimeErr">
+                <option value="" data-en="Choose an end time" data-es="Escoge la hora de fin">Choose an end time</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="19:00">7:00 PM</option>
+                <option value="20:00">8:00 PM</option>
+              </select>
+              <span class="field__error" id="rEndTimeErr" data-en="Pick an end time after the start time." data-es="Escoge una hora de fin posterior a la de inicio.">Pick an end time after the start time.</span>
+            </div>
+
+            <div class="field field--full">
+              <label id="vehicleLabel"><span data-en="Vehicle type" data-es="Tipo de vehículo">Vehicle type</span> <span class="req" aria-hidden="true">*</span></label>
+              <div class="vehicle-pills" role="radiogroup" aria-labelledby="vehicleLabel" aria-describedby="rVehErr">
+                <label class="pill">
+                  <input type="radio" name="vehicle" value="ATV" data-key="atv" required aria-required="true">
+                  <span class="name">ATV</span><span class="rate">$30 <span data-en="/ hr" data-es="/ hr">/ hr</span></span>
+                </label>
+                <label class="pill">
+                  <input type="radio" name="vehicle" value="2-Seat RZR" data-key="rzr2">
+                  <span class="name" data-en="2-Seat RZR" data-es="RZR de 2">2-Seat RZR</span><span class="rate">$120 <span>/ hr</span></span>
+                </label>
+                <label class="pill">
+                  <input type="radio" name="vehicle" value="4-Seat RZR" data-key="rzr4">
+                  <span class="name" data-en="4-Seat RZR" data-es="RZR de 4">4-Seat RZR</span><span class="rate">$150 <span>/ hr</span></span>
+                </label>
+                <label class="pill">
+                  <input type="radio" name="vehicle" value="Can-Am" data-key="canam">
+                  <span class="name">Can-Am</span><span class="rate">$170 <span>/ hr</span></span>
+                </label>
+              </div>
+              <span class="field__error" id="rVehErr" data-en="Choose a vehicle." data-es="Escoge un vehículo.">Choose a vehicle.</span>
+            </div>
+
+            <div class="field">
+              <label for="rRiders"><span data-en="How many riders" data-es="Cuántos van">How many riders</span> <span class="req" aria-hidden="true">*</span></label>
+              <div class="stepper">
+                <button type="button" id="ridersMinus" aria-label="Fewer riders">&minus;</button>
+                <input type="number" id="rRiders" name="riders" min="1" max="20" value="1" inputmode="numeric" required aria-required="true" aria-describedby="rRidersErr">
+                <button type="button" id="ridersPlus" aria-label="More riders">+</button>
+              </div>
+              <span class="field__error" id="rRidersErr" data-en="Add at least one rider." data-es="Agrega al menos un pasajero.">Add at least one rider.</span>
+            </div>
+
+            <div class="field">
+              <label for="rName"><span data-en="Name" data-es="Nombre">Name</span> <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="rName" name="name" autocomplete="name" required aria-required="true" aria-describedby="rNameErr">
+              <span class="field__error" id="rNameErr" data-en="Tell us your name." data-es="Dinos tu nombre.">Tell us your name.</span>
+            </div>
+
+            <div class="field">
+              <label for="rPhone"><span data-en="Phone or WhatsApp" data-es="Teléfono o WhatsApp">Phone or WhatsApp</span> <span class="req" aria-hidden="true">*</span></label>
+              <input type="tel" id="rPhone" name="phone" autocomplete="tel" inputmode="tel" aria-describedby="rContactErr"
+                     data-placeholder-en="Best number to reach you" data-placeholder-es="El mejor número para localizarte" placeholder="Best number to reach you">
+            </div>
+
+            <div class="field field--full">
+              <label for="rEmail"><span data-en="Email" data-es="Correo">Email</span> <span class="opt" data-en="(or just leave a phone)" data-es="(o solo deja un teléfono)">(or just leave a phone)</span></label>
+              <input type="email" id="rEmail" name="email" autocomplete="email" aria-describedby="rContactErr"
+                     data-placeholder-en="you@email.com" data-placeholder-es="tu@correo.com" placeholder="you@email.com">
+              <span class="field__error" id="rContactErr" data-en="Add a phone or email so we can send your booking details." data-es="Agrega un teléfono o correo para enviarte los detalles de tu reserva.">Add a phone or email so we can send your booking details.</span>
+            </div>
+
+            <div class="field field--full">
+              <label for="rNotes"><span data-en="Notes" data-es="Notas">Notes</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+              <textarea id="rNotes" name="notes"
+                        data-placeholder-en="Anything we should know? Group size, experience, special requests."
+                        data-placeholder-es="¿Algo que debamos saber? Tamaño del grupo, experiencia, peticiones especiales."
+                        placeholder="Anything we should know? Group size, experience, special requests."></textarea>
+            </div>
+
+            <!-- REQUIRED: digital rental agreement / waiver step (replaces the paper waiver) -->
+            <div class="field field--full">
+              <label id="waiverLabel"><span data-en="Rental Agreement & Waiver" data-es="Contrato de Renta y Exoneración">Rental Agreement &amp; Waiver</span> <span class="req" aria-hidden="true">*</span></label>
+              <div class="waiver-step" id="waiverStep" aria-describedby="rWaiverErr">
+                <button type="button" class="btn btn--dark waiver-step__btn" id="openWaiver"
+                        aria-haspopup="dialog" aria-controls="waiverModal"
+                        data-en="Read &amp; sign the rental waiver" data-es="Leer y firmar el contrato de renta">Read &amp; sign the rental waiver</button>
+                <div class="waiver-step__status" id="waiverStatus" role="status" aria-live="polite">
+                  <span class="waiver-step__status-pending" id="waiverPending"
+                        data-en="Not signed yet" data-es="Sin firmar aún">Not signed yet</span>
+                  <span class="waiver-step__status-signed" id="waiverSigned" hidden>
+                    <svg class="waiver-check" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span id="waiverSignedText"></span>
+                  </span>
+                </div>
+              </div>
+              <span class="field__error" id="rWaiverErr" data-en="Please read and sign the rental waiver to book your ride." data-es="Por favor lee y firma el contrato de renta para reservar tu paseo.">Please read and sign the rental waiver to book your ride.</span>
+            </div>
+          </div>
+
+          <div class="form-error-notice" id="formError" role="alert">
+            <!-- phone fallback so a failed submit never loses the lead -->
+            <span data-en="Something went wrong sending that. Call or WhatsApp us at 638-112-4485 and we'll get you on the calendar." data-es="Algo salió mal al enviar. Llámanos o mándanos WhatsApp al 638-112-4485 y te ponemos en el calendario.">Something went wrong sending that. Call or WhatsApp us at 638-112-4485 and we'll get you on the calendar.</span>
+          </div>
+
+          <div class="form-submit">
+            <button type="submit" class="btn btn--red" id="submitBtn" disabled aria-describedby="submitHint">
+              <span class="btn-label" data-en="Book my ride" data-es="Reservar mi paseo">Book my ride</span>
+            </button>
+            <!-- Submit stays disabled until the rental waiver is signed. The hint explains why; it hides once signed. -->
+            <p class="form-submit__hint" id="submitHint" role="status" aria-live="polite"
+               data-en="Please sign the rental waiver above to complete your booking." data-es="Por favor firma el contrato de renta de arriba para completar tu reserva.">Please sign the rental waiver above to complete your booking.</p>
+          </div>
+          <p class="form-reassure" data-en="Instant booking. Pick your time, sign the waiver, and your ride is reserved. Open daily, 9 AM til sunset." data-es="Reserva instantánea. Escoge tu hora, firma el contrato y tu paseo queda apartado. Abierto diario, 9 AM al atardecer.">Instant booking. Pick your time, sign the waiver, and your ride is reserved. Open daily, 9 AM til sunset.</p>
+        </form>
+      </div>
+
+      <!-- Success state -->
+      <div class="reserve__success" id="reserveSuccess" role="status" aria-live="polite">
+        <div class="success-check" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="sx-title" data-en="You're booked!" data-es="¡Reservado!">You're booked!</p>
+        <p class="sx-body" id="successBody" data-en="You're booked! Check your phone for your booking details. See you on the sand." data-es="¡Listo! Revisa tu teléfono para los detalles de tu reserva. Nos vemos en la arena.">You're booked! Check your phone for your booking details. See you on the sand.</p>
+        <button type="button" class="sx-reset" id="resetForm" data-en="Book another" data-es="Reservar otro">Book another</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== Footer ===================== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <a href="index.html" aria-label="La Palapa ATV'S, home"><img src="assets/logo_nav.webp" width="480" height="320" loading="lazy" alt="La Palapa ATV'S logo"></a>
+        <span class="flag-stripe" aria-hidden="true"></span>
+        <p data-en="ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them." data-es="Renta de ATV y side-by-side en Puerto Peñasco, Rocky Point. Dunas, playa y 45 formas de recorrerlas.">ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them.</p>
+        <p class="foot__signoff" data-en="See you in the dunes." data-es="Nos vemos en las dunas.">See you in the dunes.</p>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Explore" data-es="Explora">Explore</h4>
+        <ul>
+          <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+          <li><a href="reserve.html" aria-current="page" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+          <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+          <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+          <li><a href="visit.html" data-en="Visit" data-es="Visítanos">Visit</a></li>
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Contact" data-es="Contacto">Contact</h4>
+        <ul>
+          <li><a href="tel:+526381124485">638-112-4485</a></li>
+          <li><a href="tel:+526381094266">638-109-4266</a></li>
+          <li><a href="https://www.instagram.com/la_palapa_rentals4/" target="_blank" rel="noopener">Instagram @la_palapa_rentals4</a></li>
+          <!-- Email TBD from owner -->
+          <li data-en="Email coming soon" data-es="Correo próximamente">Email coming soon</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>&copy; <span id="year">2026</span> La Palapa ATV'S</span>
+      <span data-en="Site by NeonFrame Web Design" data-es="Sitio por NeonFrame Web Design">Site by <a href="https://neonframewebdesign.com" target="_blank" rel="noopener">NeonFrame Web Design</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile pinned action bar (below ~900px) -->
+<div class="mobile-bar" aria-label="Quick actions">
+  <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  <!-- WhatsApp number TBD: this currently dials the primary phone line. Swap to wa.me link when confirmed. -->
+  <a class="icon-btn" href="tel:+526381124485" aria-label="Call La Palapa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+  </a>
+</div>
+<!-- ===================== Rental Agreement / Waiver modal =====================
+     Focus-trapped dialog. Opened from the reservation form's "Read & sign the rental waiver".
+     The CONTRACT BODY is the owner's ACTUAL legal document, reproduced VERBATIM in English.
+     DO NOT paraphrase, summarize, "improve," or machine-translate the legal text.
+     i18n note: only the UI chrome (labels/buttons/headings around the contract) gets EN/ES via
+     data-en/data-es. The contract body stays in English on purpose.
+     TODO (owner): supply an OFFICIAL Spanish-language version of this contract to display for
+     Spanish-speaking customers. Until then the English legal text is the binding document shown. -->
+<div class="waiver" id="waiverModal" role="dialog" aria-modal="true" aria-labelledby="waiverTitle" aria-describedby="waiverSub" hidden>
+  <div class="waiver__overlay" id="waiverOverlay" aria-hidden="true"></div>
+  <div class="waiver__dialog" role="document">
+    <header class="waiver__head">
+      <div>
+        <h2 class="waiver__title" id="waiverTitle" data-en="Rental Agreement & Liability Waiver" data-es="Contrato de Renta y Exoneración de Responsabilidad">Rental Agreement &amp; Liability Waiver</h2>
+        <p class="waiver__sub" id="waiverSub" data-en="Please read in full and sign below." data-es="Por favor lee todo el contrato y firma abajo.">Please read in full and sign below.</p>
+      </div>
+      <button type="button" class="waiver__close" id="waiverClose" aria-label="Close" data-aria-en="Close" data-aria-es="Cerrar">&times;</button>
+    </header>
+
+    <div class="waiver__scroll">
+      <!-- ============================================================
+           BEGIN VERBATIM CONTRACT TEXT (English, owner's actual document).
+           Reproduced character-for-character. Set in Inter for legibility.
+           DO NOT EDIT THE WORDING. The {{TODAY}} token is replaced at open time
+           by the auto-filled signing date in the signing line below.
+           ============================================================ -->
+      <div class="waiver__contract" id="waiverContract">
+        <p class="waiver__c-brand">LA PALAPA RENTALS</p>
+        <p>CONTRATO DE RENTA DE RZR, CAN-AM. - That celebrate, on the one hand, the business LA PALAPA RZR &amp; ATV RENTALS, and on the other hand, THE CUSTOMER, who agrees on the rent consisting of:</p>
+
+        <p class="waiver__c-h">UNDER THE FOLLOWING CONDITIONS OR REGULATIONS FOR ITS USE:</p>
+        <ul>
+          <li>Shall be driven by people of legal age, and he/she shall have a driver's license</li>
+          <li>Obey all traffic signals and use the helmet given as a protective measure</li>
+          <li>Do not carry more than 4 people per RZR or Can-Am</li>
+          <li>Do not put the unit(s) into water, mud, or the sea water</li>
+          <li>Do not drive in the mountain called La Choya</li>
+          <li>Do not consume alcohol, drugs or substances that may prevent you from having full physical and mental capacity</li>
+          <li>The unit shall be delivered at the agreed time, any delay generates extra cost</li>
+          <li>There is no refund for delivering the unit before the agreed time</li>
+        </ul>
+
+        <p class="waiver__c-h">EXTRA PAYMENT FOR DAMAGES:</p>
+        <ul>
+          <li>For putting the unit in water or mud from $500.00 DLLS</li>
+          <li>Broken bars due to mishandling, crash or rollover $500.00 DLLS each</li>
+          <li>Damages in general caused by mishandling, crash or rollover start at: RZR or CAN-AM starting at $4,000.00 DLLS per service up to $38,000.00 DLLS for complete loss plus damages</li>
+        </ul>
+
+        <p class="waiver__c-h">LIABILITY. - THE CUSTOMER drives at his/her own risk, LA PALAPA RENTALS, has not contracted any insurance policy for civil liability or damages, therefore, THE CUSTOMER:</p>
+        <ul>
+          <li>is fully responsible and is bound to respond including and excludes for any damages or accident (including death) caused by mishandling, crash or rollover, by him/her or by the people he/she allows to drive the unit during the time of rental of the unit or while it is in possession, whether to third parties involved traveling in the unit or not, or to him/herself.</li>
+          <li>Is bound and agrees to respond for any mechanical and physical damages caused to the rental unit, or to any other involved.</li>
+          <li>Is bound and agrees to respond for damages caused to public or private property, as well as violations of traffic regulations</li>
+          <li>The insurance policy that the customer may have for his/her private vehicle does not apply to the rented unit nor does it cover damages caused.</li>
+        </ul>
+
+        <p class="waiver__c-h">WARRANTY. - THE CUSTOMER as a guarantee that he/she will be liable for all damages that could be caused by mishandling, collision or overturning; in this contract, gives as deposit and guarantee the vehicle with the following characteristics ____________; same that will be returned to cover the total cost of the damage(s) caused.</p>
+
+        <!-- The WARRANTY "characteristics ___" blank is filled in by staff at pickup, not the online customer. -->
+        <p class="waiver__c-staff" aria-hidden="true"><span data-en="Vehicle characteristics (filled in by staff at pickup):" data-es="Características del vehículo (las llena el personal al recoger):">Vehicle characteristics (filled in by staff at pickup):</span> <span class="waiver__c-blank">____________________________________________</span></p>
+
+        <p class="waiver__c-sign-line">The customer declares to have read and fully acknowledges the content of this contract, in Puerto Penasco, Sonora on the <span id="waiverContractDate" class="waiver__c-date">[date]</span> ; therefore, it is recorded by signing at the bottom of this document.</p>
+      </div>
+      <!-- END VERBATIM CONTRACT TEXT -->
+
+      <!-- Small bilingual note. ONLY this note is translated; the contract clauses above stay English.
+           An OFFICIAL Spanish legal version is pending from the owner (do NOT auto-translate the clauses). -->
+      <p class="waiver__c-note" data-en="Official Spanish version available at pickup." data-es="Versión oficial en español disponible al recoger.">Official Spanish version available at pickup.</p>
+    </div>
+
+    <!-- Customer general data (mirrors the paper's CUSTOMER GENERAL DATA) + signing -->
+    <form class="waiver__form" id="waiverForm" novalidate>
+      <h3 class="waiver__sec" data-en="Customer Data" data-es="Datos del Cliente">Customer Data</h3>
+      <div class="waiver-grid">
+        <div class="field field--full">
+          <label for="wName"><span data-en="Full name" data-es="Nombre completo">Full name</span> <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="wName" name="wName" autocomplete="name" required aria-required="true" aria-describedby="wNameErr">
+          <span class="field__error" id="wNameErr" data-en="Enter your full legal name." data-es="Escribe tu nombre legal completo.">Enter your full legal name.</span>
+        </div>
+        <div class="field">
+          <label for="wPhone"><span data-en="Telephone" data-es="Teléfono">Telephone</span> <span class="req" aria-hidden="true">*</span></label>
+          <input type="tel" id="wPhone" name="wPhone" autocomplete="tel" inputmode="tel" required aria-required="true" aria-describedby="wPhoneErr">
+          <span class="field__error" id="wPhoneErr" data-en="Enter a telephone number." data-es="Escribe un número de teléfono.">Enter a telephone number.</span>
+        </div>
+        <div class="field">
+          <label for="wAddress"><span data-en="Address" data-es="Dirección">Address</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wAddress" name="wAddress" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label for="wHotel"><span data-en="Hotel" data-es="Hotel">Hotel</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wHotel" name="wHotel">
+        </div>
+        <div class="field">
+          <label for="wRoom"><span data-en="Room No." data-es="No. de Habitación">Room No.</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="text" id="wRoom" name="wRoom" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="wCheckin"><span data-en="Check-in" data-es="Entrada">Check-in</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="date" id="wCheckin" name="wCheckin">
+        </div>
+        <div class="field">
+          <label for="wCheckout"><span data-en="Check-out" data-es="Salida">Check-out</span> <span class="opt" data-en="(optional)" data-es="(opcional)">(optional)</span></label>
+          <input type="date" id="wCheckout" name="wCheckout">
+        </div>
+      </div>
+
+      <!-- Auto-filled signing line -->
+      <p class="waiver__signed-place" id="waiverSignedPlace">
+        <span data-en="Signed in Puerto Penasco, Sonora on" data-es="Firmado en Puerto Peñasco, Sonora el">Signed in Puerto Penasco, Sonora on</span>
+        <span class="waiver__signed-date" id="waiverSignDate"></span>
+      </p>
+
+      <!-- Required agreement -->
+      <label class="waiver__agree" for="wAgree">
+        <input type="checkbox" id="wAgree" name="wAgree" required aria-required="true" aria-describedby="wAgreeErr">
+        <span data-en="I have read and fully acknowledge the content of this contract and agree to its terms." data-es="He leído y reconozco plenamente el contenido de este contrato y acepto sus términos.">I have read and fully acknowledge the content of this contract and agree to its terms.</span>
+      </label>
+      <span class="field__error waiver__agree-err" id="wAgreeErr" data-en="You must agree to the terms to sign." data-es="Debes aceptar los términos para firmar.">You must agree to the terms to sign.</span>
+
+      <!-- Signature: draw OR type a legal name (either satisfies the signature) -->
+      <h3 class="waiver__sec" data-en="Signature" data-es="Firma">Signature</h3>
+      <p class="waiver__sig-help" data-en="Sign by drawing below, or type your full legal name. Either one counts as your signature." data-es="Firma dibujando abajo, o escribe tu nombre legal completo. Cualquiera de las dos cuenta como tu firma.">Sign by drawing below, or type your full legal name. Either one counts as your signature.</p>
+
+      <div class="waiver__sig">
+        <div class="waiver__sig-canvas-wrap">
+          <canvas id="waiverCanvas" class="waiver__sig-canvas" width="600" height="180"
+                  role="img" aria-label="Draw your signature here" tabindex="0"></canvas>
+          <span class="waiver__sig-baseline" aria-hidden="true"></span>
+          <span class="waiver__sig-placeholder" id="waiverSigPlaceholder" aria-hidden="true"
+                data-en="Draw your signature here" data-es="Dibuja tu firma aquí">Draw your signature here</span>
+        </div>
+        <button type="button" class="waiver__sig-clear" id="waiverSigClear"
+                data-en="Clear" data-es="Borrar">Clear</button>
+      </div>
+
+      <div class="field field--full waiver__typed">
+        <label for="wTypedSig"><span data-en="Or type your full legal name to sign" data-es="O escribe tu nombre legal completo para firmar">Or type your full legal name to sign</span></label>
+        <input type="text" id="wTypedSig" name="wTypedSig" autocomplete="off" aria-describedby="wSigErr"
+               data-placeholder-en="Type your full legal name" data-placeholder-es="Escribe tu nombre legal completo" placeholder="Type your full legal name">
+      </div>
+      <span class="field__error waiver__sig-err" id="wSigErr" data-en="Add a signature: draw above or type your full legal name." data-es="Agrega una firma: dibuja arriba o escribe tu nombre legal completo.">Add a signature: draw above or type your full legal name.</span>
+
+      <div class="waiver__actions">
+        <button type="button" class="btn waiver__cancel" id="waiverCancel" data-en="Cancel" data-es="Cancelar">Cancel</button>
+        <button type="submit" class="btn btn--red waiver__submit" id="waiverSign" disabled>
+          <span data-en="Agree & Sign" data-es="Aceptar y Firmar">Agree &amp; Sign</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<!-- GSAP + ScrollTrigger (CDN, deferred) then the site module -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>

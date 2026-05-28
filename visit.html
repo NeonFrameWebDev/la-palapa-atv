@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+
+<!-- Primary title/description. data-en/data-es lets the JS toggle swap these live. -->
+<title data-en="Visit, Find Us in Rocky Point | La Palapa ATV'S" data-es="Visítanos, Encuéntranos en Rocky Point | La Palapa ATV'S">Visit, Find Us in Rocky Point | La Palapa ATV'S</title>
+<meta name="description" id="metaDescription" content="Find La Palapa ATV'S in Playa Bonita, Puerto Penasco (Rocky Point), Sonora. Open daily, 9 AM til sunset. Call or WhatsApp 638-112-4485.">
+<meta name="keywords" content="ATV rentals Rocky Point, side by side rentals Puerto Penasco, RZR rental Rocky Point, Can-Am rental Sonora, dune buggy rentals Rocky Point, La Palapa ATV, Puerto Penasco ATV, renta de ATV Puerto Penasco">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="La Palapa ATV'S">
+<meta name="geo.region" content="MX-SON">
+<meta name="geo.placename" content="Puerto Penasco, Sonora">
+
+<link rel="canonical" href="https://neonframewebdev.github.io/la-palapa-atv/visit.html">
+<!-- hreflang: EN primary/default, ES toggle, x-default to EN -->
+<link rel="alternate" hreflang="en" href="https://neonframewebdev.github.io/la-palapa-atv/visit.html">
+<link rel="alternate" hreflang="es" href="https://neonframewebdev.github.io/la-palapa-atv/visit.html?lang=es">
+<link rel="alternate" hreflang="x-default" href="https://neonframewebdev.github.io/la-palapa-atv/visit.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="business.business">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_MX">
+<meta property="og:title" content="Visit, Find Us in Rocky Point | La Palapa ATV'S">
+<meta property="og:description" content="Find us in Playa Bonita, Puerto Penasco (Rocky Point), Sonora. Open daily, 9 AM til sunset.">
+<meta property="og:image" content="https://neonframewebdev.github.io/la-palapa-atv/assets/og-image.jpg">
+<meta property="og:image:alt" content="La Palapa ATV'S entrance in Puerto Penasco with the rental fleet and papel picado, Open Every Day">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<!-- og:url points to the GitHub Pages preview during the spec phase; Bolt re-points to the customer domain at delivery. -->
+<meta property="og:url" content="https://neonframewebdev.github.io/la-palapa-atv/visit.html">
+<meta property="og:site_name" content="La Palapa ATV'S">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Visit, Find Us in Rocky Point | La Palapa ATV'S">
+<meta name="twitter:description" content="Find us in Playa Bonita, Puerto Penasco (Rocky Point), Sonora. Open daily, 9 AM til sunset.">
+<meta name="twitter:image" content="https://neonframewebdev.github.io/la-palapa-atv/assets/og-image.jpg">
+<meta name="twitter:image:alt" content="La Palapa ATV'S, Open Every Day, Puerto Penasco Rocky Point">
+
+<!-- Icons -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<!-- Fonts: single request, display=swap, preconnect + print-swap trick so fonts never block render -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<a class="skip" href="#main" data-en="Skip to content" data-es="Saltar al contenido">Skip to content</a>
+
+<!-- ===================== Loader (once per session, any page) ===================== -->
+<div class="loader" id="loader" aria-hidden="true">
+  <img class="loader__logo" src="assets/logo_nav.webp" width="480" height="320" alt="">
+  <hr class="flag-stripe loader__stripe">
+  <div class="loader__track"><div class="loader__bar"></div></div>
+  <div class="loader__meta" data-en="Throttle ready" data-es="Listos para arrancar">Throttle ready</div>
+</div>
+
+<div class="progress-top" id="progressTop"></div>
+
+<!-- Speedometer rail (desktop only) -->
+<aside class="rail" aria-hidden="true">
+  <span class="rail__label">La Palapa</span>
+  <div class="rail__track"><div class="rail__fill" id="railFill"></div></div>
+  <span class="rail__pct" id="railPct">0</span>
+</aside>
+
+<!-- ===================== Nav ===================== -->
+<nav class="nav is-scrolled" id="nav" aria-label="Primary">
+  <div class="wrap nav__inner">
+    <a class="nav__brand" href="index.html" aria-label="La Palapa ATV'S, home">
+      <img class="nav__logo" src="assets/logo_nav.webp" width="480" height="320" alt="La Palapa ATV'S logo" fetchpriority="high">
+      <span class="flag-stripe" aria-hidden="true"></span>
+    </a>
+    <div class="nav__right">
+      <ul class="nav__links">
+        <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+        <li><a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+        <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+        <li><a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a></li>
+        <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+        <li><a href="visit.html" class="is-active" aria-current="page" data-en="Visit" data-es="Visítanos">Visit</a></li>
+      </ul>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <a class="btn btn--red nav__cta" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+      <button class="nav__menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <span class="nav__menu-btn__bars" aria-hidden="true"><span></span><span></span></span>
+        <span data-en="Menu" data-es="Menú">Menu</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Full-screen mobile menu -->
+<aside class="menu" id="menu" aria-label="Site menu">
+  <div class="menu__top">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="is-active" aria-pressed="true">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+    <button class="menu__close" id="menuClose" data-en="Close" data-es="Cerrar">Close</button>
+  </div>
+  <nav class="menu__links" aria-label="Mobile">
+    <a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a>
+    <a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a>
+    <a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a>
+    <a href="why.html" data-en="Why La Palapa" data-es="Por Qué La Palapa">Why La Palapa</a>
+    <a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a>
+    <a href="visit.html" class="is-active" aria-current="page" data-en="Visit" data-es="Visítanos">Visit</a>
+  </nav>
+  <div class="menu__cta">
+    <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  </div>
+</aside>
+
+<main id="main">
+<!-- ===================== Visit / Contact ===================== -->
+<section class="section section--dark section--page-top" id="visit">
+  <span class="section__num" aria-hidden="true">06</span>
+  <div class="wrap">
+    <div class="section__head rise">
+      <span class="overline" data-en="Visit" data-es="Visítanos">Visit</span>
+      <h2 data-en="Find us in Rocky Point" data-es="Encuéntranos en Rocky Point">Find us in Rocky Point</h2>
+    </div>
+    <div class="visit__layout">
+      <div class="visit__info rise">
+        <span class="badge-open"><span class="pulse" aria-hidden="true"></span><span data-en="Open Every Day" data-es="Abierto Todos los Días">Open Every Day</span></span>
+
+        <div class="visit-block">
+          <h3 data-en="Hours" data-es="Horario">Hours</h3>
+          <p data-en="Open daily, 9 AM til sunset." data-es="Abierto diario, 9 AM al atardecer.">Open daily, 9 AM til sunset.</p>
+        </div>
+
+        <div class="visit-block">
+          <h3 data-en="Address" data-es="Dirección">Address</h3>
+          <!-- Real address confirmed by the owner, lightly normalized for display. -->
+          <p class="visit__address">Av. Vallarta, Calle 19 y 20 #198, Playa Bonita, Playas, C.P. 83555, Puerto Peñasco, Sonora</p>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=La+Palapa+ATV+Playa+Bonita+Av+Vallarta+Puerto+Penasco+Sonora" target="_blank" rel="noopener">
+            <span data-en="Open in Google Maps" data-es="Abrir en Google Maps">Open in Google Maps</span> <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+
+        <div class="visit-block visit__phones">
+          <h3 data-en="Call or text" data-es="Llama o escribe">Call or text</h3>
+          <!-- Primary line per owner. WhatsApp number is TBD; the WhatsApp icon in the mobile bar currently points to the primary line. -->
+          <a href="tel:+526381124485">638-112-4485<span class="tag-primary" data-en="Primary" data-es="Principal">Primary</span></a>
+          <a href="tel:+526381094266">638-109-4266</a>
+        </div>
+
+        <div class="visit-block">
+          <h3 data-en="Follow" data-es="Síguenos">Follow</h3>
+          <a href="https://www.instagram.com/la_palapa_rentals4/" target="_blank" rel="noopener">Instagram @la_palapa_rentals4</a>
+        </div>
+
+        <div class="visit__cta">
+          <a class="btn btn--red" href="reserve.html" data-en="Book your ride" data-es="Reserva tu paseo">Book your ride <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+
+      <!-- Map: links out to the confirmed location in Google Maps. -->
+      <div class="visit__map rise">
+        <div class="map-placeholder">
+          <div class="pin" aria-hidden="true">&#9873;</div>
+          <p>Playa Bonita, Puerto Peñasco (Rocky Point), Sonora, Mexico</p>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=La+Palapa+ATV+Playa+Bonita+Av+Vallarta+Puerto+Penasco+Sonora" target="_blank" rel="noopener">
+            <span data-en="View map" data-es="Ver mapa">View map</span> <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== Footer ===================== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <a href="index.html" aria-label="La Palapa ATV'S, home"><img src="assets/logo_nav.webp" width="480" height="320" loading="lazy" alt="La Palapa ATV'S logo"></a>
+        <span class="flag-stripe" aria-hidden="true"></span>
+        <p data-en="ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them." data-es="Renta de ATV y side-by-side en Puerto Peñasco, Rocky Point. Dunas, playa y 45 formas de recorrerlas.">ATV and side-by-side rentals in Puerto Penasco, Rocky Point. Dunes, beach, and 45 ways to ride them.</p>
+        <p class="foot__signoff" data-en="See you in the dunes." data-es="Nos vemos en las dunas.">See you in the dunes.</p>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Explore" data-es="Explora">Explore</h4>
+        <ul>
+          <li><a href="fleet.html" data-en="The Fleet" data-es="La Flota">The Fleet</a></li>
+          <li><a href="reserve.html" data-en="Reserve" data-es="Reserva">Reserve</a></li>
+          <li><a href="how.html" data-en="How It Works" data-es="Cómo Funciona">How It Works</a></li>
+          <li><a href="gallery.html" data-en="Gallery" data-es="Galería">Gallery</a></li>
+          <li><a href="visit.html" aria-current="page" data-en="Visit" data-es="Visítanos">Visit</a></li>
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h4 data-en="Contact" data-es="Contacto">Contact</h4>
+        <ul>
+          <li><a href="tel:+526381124485">638-112-4485</a></li>
+          <li><a href="tel:+526381094266">638-109-4266</a></li>
+          <li><a href="https://www.instagram.com/la_palapa_rentals4/" target="_blank" rel="noopener">Instagram @la_palapa_rentals4</a></li>
+          <!-- Email TBD from owner -->
+          <li data-en="Email coming soon" data-es="Correo próximamente">Email coming soon</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>&copy; <span id="year">2026</span> La Palapa ATV'S</span>
+      <span data-en="Site by NeonFrame Web Design" data-es="Sitio por NeonFrame Web Design">Site by <a href="https://neonframewebdesign.com" target="_blank" rel="noopener">NeonFrame Web Design</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile pinned action bar (below ~900px) -->
+<div class="mobile-bar" aria-label="Quick actions">
+  <a class="btn btn--red" href="reserve.html" data-en="Reserve a Ride" data-es="Reserva un Paseo">Reserve a Ride</a>
+  <!-- WhatsApp number TBD: this currently dials the primary phone line. Swap to wa.me link when confirmed. -->
+  <a class="icon-btn" href="tel:+526381124485" aria-label="Call La Palapa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+  </a>
+</div>
+
+
+<!-- ===================== JSON-LD: LocalBusiness / AutomotiveBusiness ===================== -->
+<!-- openingHoursSpecification: opens 09:00 daily. Closing is "sunset (seasonal)", which has no
+     fixed machine-readable time, so closes "19:00" is used as a representative approximation. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["LocalBusiness", "AutomotiveBusiness"],
+  "@id": "https://neonframewebdev.github.io/la-palapa-atv/#business",
+  "name": "La Palapa ATV'S",
+  "alternateName": ["La Palapa ATV", "La Palapa Rentals"],
+  "description": "ATV and side-by-side rentals in Puerto Penasco (Rocky Point), Sonora, Mexico. Around 45 machines including ATVs, RZRs, and Can-Ams. Open daily, 9 AM til sunset.",
+  "url": "https://neonframewebdev.github.io/la-palapa-atv/",
+  "logo": "https://neonframewebdev.github.io/la-palapa-atv/apple-touch-icon.png",
+  "image": [
+    "https://neonframewebdev.github.io/la-palapa-atv/assets/og-image.jpg",
+    "https://neonframewebdev.github.io/la-palapa-atv/assets/Entrance_Sign.webp",
+    "https://neonframewebdev.github.io/la-palapa-atv/assets/ATVs_front.webp"
+  ],
+  "telephone": ["+52-638-112-4485", "+52-638-109-4266"],
+  "priceRange": "$$",
+  "currenciesAccepted": "USD",
+  "slogan": "Hit the dunes. Hit the beach.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Av. Vallarta, Calle 19 y 20 #198, Playa Bonita, Playas",
+    "addressLocality": "Puerto Peñasco",
+    "addressRegion": "Sonora",
+    "postalCode": "83555",
+    "addressCountry": "MX"
+  },
+  "areaServed": [
+    {"@type": "City", "name": "Puerto Penasco"},
+    {"@type": "City", "name": "Rocky Point"}
+  ],
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "09:00",
+      "closes": "19:00"
+    }
+  ],
+  "makesOffer": [
+    {"@type": "Offer", "name": "ATV Rental", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "30.00", "priceCurrency": "USD", "unitCode": "HUR", "referenceQuantity": {"@type": "QuantitativeValue", "value": "1", "unitCode": "HUR"}}, "itemOffered": {"@type": "Product", "name": "ATV (single rider)"}},
+    {"@type": "Offer", "name": "2-Seat RZR Rental", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "120.00", "priceCurrency": "USD", "unitCode": "HUR", "referenceQuantity": {"@type": "QuantitativeValue", "value": "1", "unitCode": "HUR"}}, "itemOffered": {"@type": "Product", "name": "2-Seat RZR"}},
+    {"@type": "Offer", "name": "4-Seat RZR Rental", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "150.00", "priceCurrency": "USD", "unitCode": "HUR", "referenceQuantity": {"@type": "QuantitativeValue", "value": "1", "unitCode": "HUR"}}, "itemOffered": {"@type": "Product", "name": "4-Seat RZR"}},
+    {"@type": "Offer", "name": "Can-Am Rental", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "170.00", "priceCurrency": "USD", "unitCode": "HUR", "referenceQuantity": {"@type": "QuantitativeValue", "value": "1", "unitCode": "HUR"}}, "itemOffered": {"@type": "Product", "name": "Can-Am side-by-side"}}
+  ],
+  "sameAs": [
+    "https://www.instagram.com/la_palapa_rentals4/"
+  ]
+}
+</script>
+
+<!-- GSAP + ScrollTrigger (CDN, deferred) then the site module -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>
