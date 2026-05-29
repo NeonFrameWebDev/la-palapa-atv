@@ -382,7 +382,7 @@
   /* Tiny helpers */
   function safeStr(v, max) {
     if (v == null) return '';
-    var s = String(v).replace(/[ -]/g, '').trim();
+    var s = String(v).replace(/[\x00-\x1F\x7F]/g, '').trim();
     if (max && s.length > max) s = s.slice(0, max);
     return s;
   }
