@@ -367,11 +367,21 @@
   }
 
   /* =====================================================
-     Submission constants. Owner's primary line is the WhatsApp + tel fallback channel.
-     When the owner provides a dedicated email, swap BOOKING_RECIPIENT_EMAIL below.
+     Submission constants.
+     - BOOKING_RECIPIENT_EMAIL = the FormSubmit PRIMARY recipient. Kept as the already-activated
+       becca@ address ON PURPOSE so nobody has to click FormSubmit's one-time "Activate Form" link
+       (only the primary needs activation; CC recipients never do). The owner is NOT tech-literate,
+       so we avoid making them activate anything.
+     - OWNER_CC_LIST = the owner's real inboxes. They go on CC and receive every booking + signed PDF
+       directly, having set up nothing. The customer's email is appended to CC at submit time too.
      ===================================================== */
   var BOOKING_RECIPIENT_EMAIL = 'becca@neonframewebdesign.com';
+  var OWNER_CC_LIST = 'Bryanthernandezrodriguez@gmail.com,elgordo480@icloud.com';
   var FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/' + BOOKING_RECIPIENT_EMAIL;
+  // Build the full CC line: the two owner inboxes, plus the customer's email when provided.
+  function ccLine(customerEmail) {
+    return OWNER_CC_LIST + (customerEmail ? ',' + customerEmail : '');
+  }
   var OWNER_PHONE_DIGITS = '526381124485'; // E.164 without +, for wa.me + tel:
   var OWNER_PHONE_DISPLAY = '638-112-4485';
   var SUBMIT_TIMEOUT_MS = 18000;
@@ -842,7 +852,7 @@
       var replytoEl = document.getElementById('rFsReplyto');
       var autoEl = document.getElementById('rFsAutoresponse');
       if (subjEl) subjEl.value = 'Reserva La Palapa: ' + (booking.name || 'Nuevo') + ' / ' + (booking.vehicle || 'vehículo') + ' / ' + (booking.date || todayISO());
-      if (ccEl) ccEl.value = booking.email; // customer copy
+      if (ccEl) ccEl.value = ccLine(booking.email); // owners + customer copy
       if (replytoEl) replytoEl.value = booking.email || ''; // replies go to customer
       if (autoEl) autoEl.value = autoresponse;
 
@@ -895,8 +905,8 @@
       fd.set('_subject', subjEl ? subjEl.value : 'La Palapa booking');
       fd.set('_template', 'table');
       fd.set('_captcha', 'false');
+      fd.set('_cc', ccLine(booking.email)); // owners always; customer too when provided
       if (booking.email) {
-        fd.set('_cc', booking.email);
         fd.set('_replyto', booking.email);
       }
       fd.set('_autoresponse', autoresponse);
@@ -1332,7 +1342,7 @@
     var c = (waiverData && waiverData.customer) || {};
     // Owner email subject in Spanish.
     if (subjEl) subjEl.value = 'Contrato firmado La Palapa: ' + (waiverData.signerName || 'walk-in');
-    if (ccEl) ccEl.value = emailVal;
+    if (ccEl) ccEl.value = ccLine(emailVal); // owners + customer copy
     if (replytoEl) replytoEl.value = emailVal;
     // Customer auto-response uses the language they signed the waiver in (not the page lang).
     var customerLang = (typeof contractLang === 'string' && contractLang) ? contractLang : currentLang;
@@ -1371,8 +1381,8 @@
     fd.set('_subject', subjEl ? subjEl.value : 'Contrato firmado La Palapa');
     fd.set('_template', 'table');
     fd.set('_captcha', 'false');
+    fd.set('_cc', ccLine(emailVal)); // owners always; customer too when provided
     if (emailVal) {
-      fd.set('_cc', emailVal);
       fd.set('_replyto', emailVal);
     }
     fd.set('_autoresponse', autoEl ? autoEl.value : '');
