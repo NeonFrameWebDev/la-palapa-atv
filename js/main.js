@@ -1074,9 +1074,18 @@
     return !!(name && name.value.trim()) && !!(ph && ph.value.trim());
   }
   function refreshSignState() {
+    // The "Agree & Sign" button is ALWAYS clickable. A disabled button left users stuck with no
+    // idea why (they hadn't filled name/phone). Instead the button stays enabled and the waiverForm
+    // submit handler validates on click, showing errors + focusing the first missing field.
+    // As the user satisfies a requirement, clear its lingering error so the form feels responsive.
     if (!waiverSignBtn) return;
-    var ok = waiverAgree && waiverAgree.checked && (hasDrawnSig() || hasTypedSig()) && waiverReqFieldsOk();
-    waiverSignBtn.disabled = !ok;
+    waiverSignBtn.disabled = false;
+    if (waiverAgree && waiverAgree.checked) {
+      var ae = document.getElementById('wAgreeErr'); if (ae) ae.classList.remove('is-shown');
+    }
+    if (hasDrawnSig() || hasTypedSig()) {
+      var se = document.getElementById('wSigErr'); if (se) se.classList.remove('is-shown');
+    }
   }
   if (waiverAgree) waiverAgree.addEventListener('change', refreshSignState);
   if (waiverTypedSig) waiverTypedSig.addEventListener('input', refreshSignState);
@@ -1318,7 +1327,7 @@
       sigClear();
       waiverData = null;
       var btn = document.getElementById('waiverSign');
-      if (btn) btn.disabled = true;
+      if (btn) btn.disabled = false;
       var label = btn ? btn.querySelector('.btn-label') : null;
       if (label) label.textContent = currentLang === 'es' ? 'Aceptar y Firmar' : 'Agree & Sign';
       $$('#waiverForm .field').forEach(function (f) { f.classList.remove('has-error'); });
@@ -1372,7 +1381,7 @@
     var signed = document.getElementById('waiverSigned');
     if (pending) pending.hidden = false;
     if (signed) signed.hidden = true;
-    if (waiverSignBtn) waiverSignBtn.disabled = true;
+    if (waiverSignBtn) waiverSignBtn.disabled = false;
     if (openWaiverBtn) {
       openWaiverBtn.setAttribute('data-en', 'Read & sign the rental waiver');
       openWaiverBtn.setAttribute('data-es', 'Leer y firmar el contrato de renta');
