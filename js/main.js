@@ -852,43 +852,43 @@
       // The owner email is in Spanish. The customer copy uses the same fields (they see what they signed).
       var totalDisplay = (booking.total > 0) ? ('$' + booking.total + ' USD') : '';
       var fd = new FormData();
-      fd.append('Nombre', booking.name);
-      fd.append('Telefono', booking.phone);
-      fd.append('Correo', booking.email);
-      fd.append('Vehiculo', booking.vehicle);
-      fd.append('Fecha', booking.date);
-      fd.append('Inicio', booking.startTime);
-      fd.append('Fin', booking.endTime);
-      if (booking.hours) fd.append('Horas', String(booking.hours));
+      fd.append('Name/Nombre', booking.name);
+      fd.append('Phone/Telefono', booking.phone);
+      fd.append('Email/Correo', booking.email);
+      fd.append('Vehicle/Vehiculo', booking.vehicle);
+      fd.append('Date/Fecha', booking.date);
+      fd.append('Start/Inicio', booking.startTime);
+      fd.append('End/Fin', booking.endTime);
+      if (booking.hours) fd.append('Hours/Horas', String(booking.hours));
       if (totalDisplay) fd.append('Total', totalDisplay + ' (pago en el lugar)');
-      fd.append('Resumen', summaryES); // owner gets Spanish summary in body
+      fd.append('Summary/Resumen', summaryES); // owner gets Spanish summary in body
       // Waiver detail (single-word labels, Spanish)
       if (waiverData) {
-        fd.append('Firmado', 'SI');
-        fd.append('Firma-tipo', safeStr(waiverData.signatureType));
-        fd.append('Firma-fecha', safeStr(waiverData.signedAtISO));
-        fd.append('Firma-lugar', safeStr(waiverData.signedPlace));
-        fd.append('Firma-idioma', customerLang);
+        fd.append('Signed/Firmado', 'SI');
+        fd.append('Signature-type/Firma-tipo', safeStr(waiverData.signatureType));
+        fd.append('Signed-at/Firma-fecha', safeStr(waiverData.signedAtISO));
+        fd.append('Signed-place/Firma-lugar', safeStr(waiverData.signedPlace));
+        fd.append('Language/Idioma', customerLang);
         var c = waiverData.customer || {};
-        fd.append('Direccion', safeStr(c.address, 200));
+        fd.append('Address/Direccion', safeStr(c.address, 200));
         fd.append('Hotel', safeStr(c.hotel, 120));
-        fd.append('Habitacion', safeStr(c.roomNo, 20));
-        fd.append('Entrada', safeStr(c.checkin));
-        fd.append('Salida', safeStr(c.checkout));
-        if (waiverData.signatureType === 'typed') fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+        fd.append('Room/Habitacion', safeStr(c.roomNo, 20));
+        fd.append('Check-in/Entrada', safeStr(c.checkin));
+        fd.append('Check-out/Salida', safeStr(c.checkout));
+        if (waiverData.signatureType === 'typed') fd.append('Typed-signature/Firma-escrita', safeStr(waiverData.signature, 120));
         // PRIMARY artifact: the full signed waiver as a PDF (contract + customer data + signature).
         var pdfBlob = buildSignedWaiverPdf();
         var safeName = (booking.name || 'cliente').replace(/[^a-z0-9_-]+/gi, '_');
         if (pdfBlob) {
-          fd.append('Contrato-firmado', pdfBlob, 'Contrato-firmado-' + safeName + '-' + (booking.date || todayISO()) + '.pdf');
+          fd.append('Signed-contract/Contrato-firmado', pdfBlob, 'Contrato-firmado-' + safeName + '-' + (booking.date || todayISO()) + '.pdf');
         } else if (waiverData.signatureType === 'drawn') {
           // Fallback if PDF generation failed: at least attach the signature PNG so it's never lost.
           var blob = dataURLToBlob(waiverData.signature);
-          if (blob) fd.append('Firma-imagen', blob, 'firma-' + safeName + '.png');
-          else fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
+          if (blob) fd.append('Signature-image/Firma-imagen', blob, 'firma-' + safeName + '.png');
+          else fd.append('Signature-dataurl/Firma-data-url', safeStr(waiverData.signature, 100000));
         }
       } else {
-        fd.append('Firmado', 'NO');
+        fd.append('Signed/Firmado', 'NO');
       }
       // FormSubmit config (these are also present as hidden fields, FormData picks them up via the form)
       // We set them on the form already, but we append explicitly so the AJAX path doesn't lose them.
@@ -1344,29 +1344,29 @@
 
     // Field labels in Spanish, single-token so FormSubmit doesn't underscore them.
     var fd = new FormData();
-    fd.append('Nombre', waiverData.signerName);
-    fd.append('Telefono', safeStr(c.telephone, 40));
-    fd.append('Correo', emailVal);
-    fd.append('Direccion', safeStr(c.address, 200));
+    fd.append('Name/Nombre', waiverData.signerName);
+    fd.append('Phone/Telefono', safeStr(c.telephone, 40));
+    fd.append('Email/Correo', emailVal);
+    fd.append('Address/Direccion', safeStr(c.address, 200));
     fd.append('Hotel', safeStr(c.hotel, 120));
-    fd.append('Habitacion', safeStr(c.roomNo, 20));
-    fd.append('Entrada', safeStr(c.checkin));
-    fd.append('Salida', safeStr(c.checkout));
-    fd.append('Firma-fecha', safeStr(waiverData.signedAtISO));
-    fd.append('Firma-lugar', safeStr(waiverData.signedPlace));
-    fd.append('Firma-tipo', safeStr(waiverData.signatureType));
-    fd.append('Firma-idioma', customerLang);
-    fd.append('Acepto', waiverData.agreement ? 'SI' : 'NO');
-    if (waiverData.signatureType === 'typed') fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+    fd.append('Room/Habitacion', safeStr(c.roomNo, 20));
+    fd.append('Check-in/Entrada', safeStr(c.checkin));
+    fd.append('Check-out/Salida', safeStr(c.checkout));
+    fd.append('Signed-at/Firma-fecha', safeStr(waiverData.signedAtISO));
+    fd.append('Signed-place/Firma-lugar', safeStr(waiverData.signedPlace));
+    fd.append('Signature-type/Firma-tipo', safeStr(waiverData.signatureType));
+    fd.append('Language/Idioma', customerLang);
+    fd.append('Agreed/Acepto', waiverData.agreement ? 'SI' : 'NO');
+    if (waiverData.signatureType === 'typed') fd.append('Typed-signature/Firma-escrita', safeStr(waiverData.signature, 120));
     // PRIMARY artifact: the full signed waiver PDF (contract + customer data + signature).
     var wSafeName = (waiverData.signerName || 'cliente').replace(/[^a-z0-9_-]+/gi, '_');
     var wPdf = buildSignedWaiverPdf();
     if (wPdf) {
-      fd.append('Contrato-firmado', wPdf, 'Contrato-firmado-' + wSafeName + '.pdf');
+      fd.append('Signed-contract/Contrato-firmado', wPdf, 'Contrato-firmado-' + wSafeName + '.pdf');
     } else if (waiverData.signatureType === 'drawn') {
       var sblob = dataURLToBlob(waiverData.signature);
-      if (sblob) fd.append('Firma-imagen', sblob, 'firma-' + wSafeName + '.png');
-      else fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
+      if (sblob) fd.append('Signature-image/Firma-imagen', sblob, 'firma-' + wSafeName + '.png');
+      else fd.append('Signature-dataurl/Firma-data-url', safeStr(waiverData.signature, 100000));
     }
     fd.set('_subject', subjEl ? subjEl.value : 'Contrato firmado La Palapa');
     fd.set('_template', 'table');
