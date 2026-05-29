@@ -406,6 +406,96 @@
       return new Blob([arr], { type: mime });
     } catch (err) { return null; }
   }
+  /* ---- Build the FULL signed-waiver PDF (contract text + customer data + signature) ----
+     Uses vendored jsPDF. Reads the contract clauses straight from the DOM (the language the
+     customer signed in) so the legal text stays verbatim/single-source. Returns a Blob, or null
+     if jsPDF isn't available or anything throws (caller falls back to attaching the signature PNG). */
+  function contractBlocksForPdf(lang) {
+    var el = document.getElementById(lang === 'es' ? 'waiverContractEs' : 'waiverContractEn');
+    if (!el) return [];
+    var blocks = [];
+    Array.prototype.forEach.call(el.children, function (node) {
+      if (node.tagName === 'UL') {
+        Array.prototype.forEach.call(node.children, function (li) {
+          blocks.push({ type: 'li', text: (li.textContent || '').replace(/\s+/g, ' ').trim() });
+        });
+      } else if (node.tagName === 'P') {
+        var cls = node.className || '';
+        var type = /c-h/.test(cls) ? 'h' : (/c-brand/.test(cls) ? 'brand' : 'p');
+        blocks.push({ type: type, text: (node.textContent || '').replace(/\s+/g, ' ').trim() });
+      }
+    });
+    return blocks;
+  }
+  function buildSignedWaiverPdf() {
+    try {
+      var Ctor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+      if (!Ctor || !waiverData) return null;
+      var doc = new Ctor({ unit: 'pt', format: 'letter' });
+      var pw = doc.internal.pageSize.getWidth();
+      var ph = doc.internal.pageSize.getHeight();
+      var M = 54, maxw = pw - M * 2, y = M;
+      function need(h) { if (y + h > ph - M) { doc.addPage(); y = M; } }
+      function text(str, o) {
+        o = o || {};
+        doc.setFont(o.font || 'helvetica', o.style || 'normal');
+        doc.setFontSize(o.size || 10);
+        doc.setTextColor.apply(doc, o.color || [30, 30, 30]);
+        var indent = o.indent || 0;
+        var lines = doc.splitTextToSize(String(str || ''), maxw - indent);
+        var lh = (o.size || 10) * 1.36;
+        for (var i = 0; i < lines.length; i++) { need(lh); doc.text(lines[i], M + indent, y); y += lh; }
+        if (o.after) y += o.after;
+      }
+      // Header
+      doc.setFillColor(204, 28, 28); doc.rect(0, 0, pw, 7, 'F');
+      text('LA PALAPA RENTALS', { style: 'bold', size: 15, after: 2 });
+      text('Rental Agreement & Liability Waiver', { style: 'bold', size: 11, color: [150, 20, 20], after: 8 });
+      var when = waiverData.signedAtISO;
+      try { when = new Date(waiverData.signedAtISO).toLocaleString(); } catch (e) {}
+      text('Signed in ' + waiverData.signedPlace + ' on ' + when, { size: 9, color: [110, 110, 110], after: 12 });
+      doc.setDrawColor(200, 169, 106); need(2); doc.line(M, y, pw - M, y); y += 14;
+      // Contract clauses (verbatim, in the signed language)
+      contractBlocksForPdf(waiverData.contractLang).forEach(function (b) {
+        if (b.type === 'brand') text(b.text, { style: 'bold', size: 11, after: 4 });
+        else if (b.type === 'h') text(b.text, { style: 'bold', size: 10, after: 3 });
+        else if (b.type === 'li') text('•  ' + b.text, { size: 9.5, indent: 12, after: 2 });
+        else text(b.text, { size: 9.5, after: 6 });
+      });
+      // Customer data
+      y += 4; need(2); doc.setDrawColor(200, 169, 106); doc.line(M, y, pw - M, y); y += 14;
+      text('Customer Data', { style: 'bold', size: 12, after: 6 });
+      var c = waiverData.customer || {};
+      function row(label, val) { if (val) text(label + ': ' + val, { size: 10, after: 2 }); }
+      row('Full name', c.fullName);
+      row('Telephone', c.telephone);
+      row('Email', c.email);
+      row('Address', c.address);
+      row('Hotel', c.hotel);
+      row('Room No.', c.roomNo);
+      row('Check-in', c.checkin);
+      row('Check-out', c.checkout);
+      // Agreement + signature
+      y += 8;
+      text('The customer has read and fully acknowledges the content of this contract and agrees to its terms.', { style: 'italic', size: 9.5, after: 10 });
+      text('Signature', { style: 'bold', size: 11, after: 6 });
+      if (waiverData.signatureType === 'drawn' && /^data:image\/png/.test(String(waiverData.signature))) {
+        var sw = 240, sh = 80; need(sh + 18);
+        try { doc.addImage(waiverData.signature, 'PNG', M, y, sw, sh); } catch (e) {}
+        y += sh + 2;
+        doc.setDrawColor(120, 120, 120); doc.line(M, y, M + sw, y); y += 12;
+        text(waiverData.signerName, { size: 10, color: [90, 90, 90] });
+      } else {
+        need(40);
+        doc.setFont('times', 'italic'); doc.setFontSize(22); doc.setTextColor(20, 20, 20);
+        doc.text(String(waiverData.signature || waiverData.signerName), M, y + 16); y += 34;
+        doc.setDrawColor(120, 120, 120); doc.line(M, y, M + 240, y); y += 12;
+        text('Typed signature — ' + waiverData.signerName, { size: 9, color: [90, 90, 90] });
+      }
+      return doc.output('blob');
+    } catch (e) { return null; }
+  }
+
   function escapeHTML(s) {
     return safeStr(s).replace(/[&<>"']/g, function (c) {
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
@@ -785,16 +875,17 @@
         fd.append('Habitacion', safeStr(c.roomNo, 20));
         fd.append('Entrada', safeStr(c.checkin));
         fd.append('Salida', safeStr(c.checkout));
-        if (waiverData.signatureType === 'drawn') {
+        if (waiverData.signatureType === 'typed') fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+        // PRIMARY artifact: the full signed waiver as a PDF (contract + customer data + signature).
+        var pdfBlob = buildSignedWaiverPdf();
+        var safeName = (booking.name || 'cliente').replace(/[^a-z0-9_-]+/gi, '_');
+        if (pdfBlob) {
+          fd.append('Contrato-firmado', pdfBlob, 'Contrato-firmado-' + safeName + '-' + (booking.date || todayISO()) + '.pdf');
+        } else if (waiverData.signatureType === 'drawn') {
+          // Fallback if PDF generation failed: at least attach the signature PNG so it's never lost.
           var blob = dataURLToBlob(waiverData.signature);
-          if (blob) {
-            var fname = 'firma-' + (booking.name || 'cliente').replace(/[^a-z0-9_-]+/gi, '_') + '-' + (booking.date || todayISO()) + '.png';
-            fd.append('Firma-imagen', blob, fname);
-          } else {
-            fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
-          }
-        } else {
-          fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+          if (blob) fd.append('Firma-imagen', blob, 'firma-' + safeName + '.png');
+          else fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
         }
       } else {
         fd.append('Firmado', 'NO');
@@ -1178,15 +1269,18 @@
       var signatureValue = drawn ? waiverCanvas.toDataURL('image/png') : waiverTypedSig.value.trim();
       var signerName = wName.value.trim();
 
+      var wEmailEl = document.getElementById('wEmail');
       waiverData = {
         signerName: signerName,
         agreement: true,
         signatureType: drawn ? 'drawn' : 'typed',
         signature: signatureValue,
         typedName: drawn ? '' : waiverTypedSig.value.trim(),
+        contractLang: (typeof contractLang === 'string' && contractLang) ? contractLang : currentLang,
         customer: {
           fullName: signerName,
           telephone: wPhone.value.trim(),
+          email: wEmailEl ? (wEmailEl.value || '').trim() : '',
           address: (document.getElementById('wAddress').value || '').trim(),
           hotel: (document.getElementById('wHotel').value || '').trim(),
           roomNo: (document.getElementById('wRoom').value || '').trim(),
@@ -1263,16 +1357,16 @@
     fd.append('Firma-tipo', safeStr(waiverData.signatureType));
     fd.append('Firma-idioma', customerLang);
     fd.append('Acepto', waiverData.agreement ? 'SI' : 'NO');
-    if (waiverData.signatureType === 'drawn') {
-      var blob = dataURLToBlob(waiverData.signature);
-      if (blob) {
-        var fname = 'firma-' + (waiverData.signerName || 'cliente').replace(/[^a-z0-9_-]+/gi, '_') + '.png';
-        fd.append('Firma-imagen', blob, fname);
-      } else {
-        fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
-      }
-    } else {
-      fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+    if (waiverData.signatureType === 'typed') fd.append('Firma-escrita', safeStr(waiverData.signature, 120));
+    // PRIMARY artifact: the full signed waiver PDF (contract + customer data + signature).
+    var wSafeName = (waiverData.signerName || 'cliente').replace(/[^a-z0-9_-]+/gi, '_');
+    var wPdf = buildSignedWaiverPdf();
+    if (wPdf) {
+      fd.append('Contrato-firmado', wPdf, 'Contrato-firmado-' + wSafeName + '.pdf');
+    } else if (waiverData.signatureType === 'drawn') {
+      var sblob = dataURLToBlob(waiverData.signature);
+      if (sblob) fd.append('Firma-imagen', sblob, 'firma-' + wSafeName + '.png');
+      else fd.append('Firma-data-url', safeStr(waiverData.signature, 100000));
     }
     fd.set('_subject', subjEl ? subjEl.value : 'Contrato firmado La Palapa');
     fd.set('_template', 'table');
