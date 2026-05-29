@@ -174,15 +174,17 @@
         </div>
       </div>
 
-      <!-- Map: links out to the confirmed location in Google Maps. -->
+      <!-- Live embedded Google Map (keyless output=embed; no Maps API key required).
+           If the owner shares their exact Google Business / Maps share link, swap the src
+           for a pinned place embed for a precise marker. -->
       <div class="visit__map rise">
-        <div class="map-placeholder">
-          <div class="pin" aria-hidden="true">&#9873;</div>
-          <p>Playa Bonita, Puerto Peñasco (Rocky Point), Sonora, Mexico</p>
-          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=La+Palapa+ATV+Av+Vallarta+Playa+Bonita+83555+Puerto+Penasco+Sonora" target="_blank" rel="noopener">
-            <span data-en="View map" data-es="Ver mapa">View map</span> <span aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
+        <iframe class="visit__map-frame"
+                src="https://www.google.com/maps?q=La+Palapa+ATV+Av+Vallarta+Playa+Bonita+83555+Puerto+Penasco+Sonora&output=embed"
+                title="Map to La Palapa ATV'S in Playa Bonita, Puerto Penasco"
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+        <a class="visit__map-directions" href="https://www.google.com/maps/dir/?api=1&destination=La+Palapa+ATV+Av+Vallarta+Playa+Bonita+83555+Puerto+Penasco+Sonora" target="_blank" rel="noopener">
+          <span data-en="Get directions" data-es="Cómo llegar">Get directions</span> <span aria-hidden="true">&rarr;</span>
+        </a>
       </div>
     </div>
   </div>

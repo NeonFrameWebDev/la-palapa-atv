@@ -827,11 +827,23 @@ strong { font-weight: 600; }
 .map-link:hover { color: var(--gold); }
 .visit__map {
   border-radius: 10px; overflow: hidden; border: 1px solid rgba(200,169,106,0.25);
-  background: var(--ink-2); min-height: 280px; display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 1.5rem; position: relative;
+  background: var(--ink-2); position: relative;
+  min-height: 340px; display: flex; flex-direction: column;
 }
-.visit__map .map-placeholder { color: var(--cream-dim); }
-.visit__map .map-placeholder .pin { font-size: 2rem; margin-bottom: 0.5rem; color: var(--gold); }
+/* Embedded map fills the panel; on desktop the grid stretches the panel to match the
+   info column, on mobile it falls back to the min-height. */
+.visit__map-frame {
+  display: block; width: 100%; flex: 1 1 auto; min-height: 320px; border: 0;
+  filter: saturate(0.95);
+}
+.visit__map-directions {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.7rem 1rem; background: var(--ink); color: var(--gold);
+  font-family: var(--font-display); letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 0.85rem; border-top: 1px solid rgba(200,169,106,0.25);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.visit__map-directions:hover { background: var(--red); color: var(--cream); }
 .visit__cta { margin-top: 0.5rem; }
 
 /* ==========================================================================
