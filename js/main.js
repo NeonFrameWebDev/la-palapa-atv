@@ -526,6 +526,86 @@
     });
   }
 
+  /* ---- Reliable submit WITH file attachment (signature PNG) ----
+     FormSubmit's /ajax/ endpoint does NOT process file attachments (documented limitation),
+     so the signed-waiver PNG was being dropped (owner only got the reservation text). This
+     posts to the STANDARD endpoint via a hidden form + hidden iframe, which fully supports
+     multipart file attachments and keeps the user on the page (the FormSubmit thank-you loads
+     inside the hidden iframe). Resolves on iframe load, rejects on timeout (-> fallback UI). */
+  var STANDARD_ENDPOINT = 'https://formsubmit.co/' + BOOKING_RECIPIENT_EMAIL;
+  function sendViaHiddenForm(fd) {
+    return new Promise(function (resolve, reject) {
+      var frameName = 'lp_fs_' + Math.random().toString(36).slice(2);
+      var iframe = document.createElement('iframe');
+      iframe.name = frameName;
+      iframe.setAttribute('aria-hidden', 'true');
+      iframe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:0;height:0;border:0;';
+      document.body.appendChild(iframe);
+
+      var hForm = document.createElement('form');
+      hForm.action = STANDARD_ENDPOINT;
+      hForm.method = 'POST';
+      hForm.enctype = 'multipart/form-data';
+      hForm.target = frameName;
+      hForm.style.display = 'none';
+
+      fd.forEach(function (value, key) {
+        if (key === '_next') return; // skip heavy redirect; let FormSubmit show its light thank-you in the iframe
+        if (value instanceof Blob) {
+          var fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.name = key;
+          var attached = false;
+          try {
+            var dt = new DataTransfer();
+            dt.items.add(new File([value], value.name || (key + '.png'), { type: value.type || 'image/png' }));
+            fileInput.files = dt.files;
+            attached = fileInput.files && fileInput.files.length > 0;
+          } catch (e) { attached = false; }
+          if (attached) {
+            hForm.appendChild(fileInput);
+          } else {
+            // DataTransfer unsupported: fall back to sending the signature as a data-url text field
+            // (large but preserves the signature data) so the waiver is never lost.
+            var alt = document.createElement('input');
+            alt.type = 'hidden'; alt.name = 'Firma-data-url';
+            // read blob -> dataURL synchronously isn't possible; we already have it on waiverData
+            alt.value = (waiverData && waiverData.signature) ? String(waiverData.signature).slice(0, 200000) : '';
+            hForm.appendChild(alt);
+          }
+        } else {
+          var inp = document.createElement('input');
+          inp.type = 'hidden';
+          inp.name = key;
+          inp.value = value;
+          hForm.appendChild(inp);
+        }
+      });
+
+      document.body.appendChild(hForm);
+
+      var settled = false;
+      function cleanup() {
+        setTimeout(function () {
+          try { if (hForm.parentNode) hForm.parentNode.removeChild(hForm); } catch (e) {}
+          try { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); } catch (e) {}
+        }, 1500);
+      }
+      var to = setTimeout(function () {
+        if (settled) return; settled = true; reject(new Error('iframe_timeout')); cleanup();
+      }, SUBMIT_TIMEOUT_MS);
+
+      hForm.submit();
+      // Attach the load listener AFTER submit (+ small delay) so the initial about:blank load
+      // is ignored and only the real FormSubmit response resolves it.
+      setTimeout(function () {
+        iframe.addEventListener('load', function () {
+          if (settled) return; settled = true; clearTimeout(to); resolve({ success: 'true' }); cleanup();
+        });
+      }, 60);
+    });
+  }
+
   /* ---- the actual submit handler ---- */
   if (form) {
     form.addEventListener('submit', function (e) {
@@ -732,7 +812,7 @@
       // The honeypot field if present (real users empty)
       fd.set('_honey', safeStr(honey && honey.value));
 
-      postBooking(fd).then(function () {
+      sendViaHiddenForm(fd).then(function () {
         isSubmitting = false;
         showSuccess(false);
       }, function (err) {
@@ -1195,7 +1275,7 @@
     fd.set('_autoresponse', autoEl ? autoEl.value : '');
     fd.set('_honey', safeStr(honey && honey.value));
 
-    postBooking(fd).then(function () {
+    sendViaHiddenForm(fd).then(function () {
       showStandaloneWaiverSuccess();
     }, function () {
       // Re-enable submit + show fallback UI
