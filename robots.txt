@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://neonframewebdev.github.io/la-palapa-atv/sitemap.xml
+Sitemap: https://lapalapaatvs.com/sitemap.xml
