@@ -877,9 +877,7 @@ strong { font-weight: 600; }
    Mobile pinned Reserve bar
    ========================================================================== */
 .mobile-bar {
-  position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 950;
-  display: flex; gap: 0.5rem; padding: 0.6rem var(--gutter) calc(0.6rem + env(safe-area-inset-bottom, 0));
-  background: rgba(10,10,10,0.98); border-top: 1px solid rgba(200,169,106,0.22);
+  display: none !important;
 }
 .mobile-bar .btn--red { flex: 1; }
 .mobile-bar .icon-btn {
