@@ -314,22 +314,19 @@ strong { font-weight: 600; }
    it sits FULLY inside the dark text-panel area, not centered with the rest of the layout). */
 @media (min-width: 900px) {
   .hero {
-    /* center vertically inside the left panel, not flex-end at the bottom, so the copy reads
-       like an editorial hero with the photo as a feature beside it */
     align-items: center;
+    padding-top: calc(var(--nav-h) + 1rem);
     padding-bottom: 0;
   }
   .hero .wrap {
-    /* min big enough for "HIT THE DUNES." in Anton at the h1's max font (~104px) to fit */
     max-width: clamp(460px, 42vw, 560px);
     margin-left: var(--gutter);
     margin-right: auto;
     padding-left: 0;
   }
-  /* In the editorial layout, the h1 line-height can tighten a touch */
-  .hero__title { line-height: 1.0; }
+  .hero__title { line-height: 1.0; font-size: clamp(2rem, 7vw, 4rem); }
 }
-.hero__kicker { font-size: clamp(1.4rem, 6vw, 2.2rem); color: var(--gold-soft); margin-bottom: 0.4rem; text-shadow: 0 2px 18px rgba(0,0,0,0.6); }
+.hero__kicker { font-size: clamp(0.95rem, 2.5vw, 1.3rem); color: var(--gold-soft); margin-bottom: 0.4rem; text-shadow: 0 2px 18px rgba(0,0,0,0.6); }
 .hero__title { color: var(--cream); margin-bottom: 1rem; text-shadow: 0 4px 30px rgba(0,0,0,0.55); }
 .hero__title .accent { color: var(--red); }
 .hero__sub { font-size: clamp(1rem, 2.4vw, 1.2rem); max-width: 40ch; color: var(--cream); margin-bottom: 1.5rem; }
